@@ -8,11 +8,13 @@ import moment from 'moment';
 import { Bar } from 'react-chartjs-2';
 import withSerialCommunication from '../Serial/SerialHOC';
 
-class ButtonTime extends Component {
+class MeasurementFromSerial extends Component {
   constructor(props) {
     super(props);
     this.state = {
       input: [],
+      label: props.label,
+      message: props.message,
     };
 
     this.onData = this.onData.bind(this);
@@ -23,22 +25,19 @@ class ButtonTime extends Component {
     const { setOnDataCallback } = this.props;
     setOnDataCallback(this.onData);
     document.addEventListener('keydown', this.handleReset);
-    // this.checkHandshake();
   }
 
   onData(data) {
-    const { input } = this.state;
-    const press = [moment(moment.now()).format('h:mm:s'), data];
-    input.push(press);
+    const { input, message } = this.state;
 
-    this.setState({
-      input,
-    });
-  }
+    if (data.message === message) {
+      const change = [moment(moment.now()).format('h:mm:s'), data];
+      input.push(change);
 
-  stupidFunction() {
-    const { sendData } = this.props;
-    sendData();
+      this.setState({
+        input,
+      });
+    }
   }
 
   resetGraph() {
@@ -48,33 +47,37 @@ class ButtonTime extends Component {
   }
 
   render() {
-    const { input } = this.state;
+    const { input, label } = this.state;
     const labels = [];
     const values = [];
 
     /* eslint array-callback-return: 0 */
-    input.map((buttonPress) => {
-      if (buttonPress.length > 0) {
-        labels.push(buttonPress[0]);
-        values.push(buttonPress[1].value);
+    input.map((measurement) => {
+      if (measurement.length > 0) {
+        labels.push(measurement[0]);
+        values.push(measurement[1].value);
       }
     });
 
-    const dummyData = {
+    const graphData = {
       labels,
       datasets: [{
-        label: 'Dataset',
+        label,
         backgroundColor: 'rgb(255, 99, 132)',
         borderColor: 'rgb(255, 99, 132)',
         data: values,
       }],
+      maintainAspectRatio: false,
     };
 
     return (
       <Fragment>
-        <Bar data={dummyData} />
+        <Bar
+          data={graphData}
+          options={{ maintainAspectRatio: false }}
+        />
         <Button
-          color="danger"
+          color="primary"
           onClick={this.resetGraph}
         >
           Reset Graph
@@ -84,11 +87,12 @@ class ButtonTime extends Component {
   }
 }
 
-ButtonTime.propTypes = {
-  sendData: propTypes.func.isRequired,
+MeasurementFromSerial.propTypes = {
+  label: propTypes.string.isRequired,
+  message: propTypes.string.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
 };
 
-const ButtonTimeWithSerialCommunication = withSerialCommunication(ButtonTime);
+const MeasurementFromSerialCommunication = withSerialCommunication(MeasurementFromSerial);
 
-export default ButtonTimeWithSerialCommunication;
+export default MeasurementFromSerialCommunication;

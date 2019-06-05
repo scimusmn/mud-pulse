@@ -1,6 +1,6 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import './App.css';
-import ButtonTimeWithSerialCommunication from '../Graph/ButtonTime';
+import MeasurementFromSerialCommunication from '../Graph/MeasurementFromSerial';
 
 export default class App extends Component {
   constructor(props) {
@@ -12,7 +12,20 @@ export default class App extends Component {
 
   render() {
     return (
-      <ButtonTimeWithSerialCommunication />
+      <Fragment>
+        <div className="chart-container">
+          <MeasurementFromSerialCommunication
+            label="button"
+            message="button-press"
+          />
+        </div>
+        <div className="chart-container">
+          <MeasurementFromSerialCommunication
+            label="potentiometer"
+            message="pot-rotation"
+          />
+        </div>
+      </Fragment>
     );
   }
 }
