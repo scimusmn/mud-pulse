@@ -1,40 +1,19 @@
 /*Messages sent to computer:
 
-   message sent to computer if tube is not squeezed in time:
-
-          {"message":"no-squeezes", "value":1}
-
-   message sent to computer if tube squeeze count doesn't match anything:
-
-          {"message":"no-match", "value":1}
-
-   message sent to computer if the button was pressed by visitor
+  message sent to computer if the button was pressed by visitor
 
           {"message":"vrs-button-press", "value":1}
 
 
-   Material maessages:
+  squeeze count message example for 2 squeezes 
 
-   2 squeezes :
+          {"message":"squeeze-count", "value":2}
 
-        {"message":"material", "value":"limestone"}
 
-   3 squeezes :
+  analog serial stream, returns value 0-1023
 
-        {"message":"material", "value":"dolomite"}
+         {"message":"pressure-reading", "value":520}
 
-   4 squeezes :
-
-        {"message":"material", "value":"shale"}
-
-   5 squeezes :
-
-        {"message":"material", "value":"sandstone"}
-
-Serial stream:
-
-        {"message":"pressure-reading", "value":520}  
- 
 */
 
 //Arduino I/O pins
@@ -43,11 +22,11 @@ Serial stream:
 
 
 //other variables
-long timenow = 0;
-int count = 0;
-bool newread = true;
-int val = 0;
 
+ long timenow = 0;
+ int count = 0;
+ bool newread = true;
+ int val = 0;
 
 
 void setup() {
@@ -70,22 +49,12 @@ void listendata() {
       newread = true;
     }
   }
-  if (count == 0) {
-
-    Serial.println("{\"message\":\"no-squeezes\", \"value\":1");
-  }
-
-  if ((count < 2) || (count > 5)) {
-    count = 0;
-    Serial.println("{\"message\":\"no-match\", \"value\":1");
-  }
 }
-
 
 void loop() {
   if (!button) {
     timenow = millis();
-    Serial.println("{\"message\":\"vrs-button-press\", \"value\":1}"); 
+    Serial.println("{\"message\":\"vrs-button-press\", \"value\":1}");
     listendata();
   }
 
@@ -111,8 +80,8 @@ void loop() {
       count = 0;
       break;
   }
-  
-  //Serial stream
+
+  //analog serial stream
 
   Serial.print("{\"message\":\"pressure-reading\", \"value\":");
   Serial.print(val);
