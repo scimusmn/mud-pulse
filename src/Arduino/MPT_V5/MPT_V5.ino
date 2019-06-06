@@ -62,22 +62,22 @@ void loop() {
   switch (count) {
 
     case 2:
-      Serial.println("{\"message\":\"material\", \"value\":\"limestone\"}");
+      Serial.println("{\"message\":\"material\", \"value\":2"); //limestone
       count = 0;
       break;
 
     case 3:
-      Serial.println("{\"message\":\"material\", \"value\":\"dolomite\"}");
+      Serial.println("{\"message\":\"material\", \"value\":\3"); //dolomite
       count = 0;
       break;
 
     case 4:
-      Serial.println("{\"message\":\"material\", \"value\":\"shale\"}");
+      Serial.println("{\"message\":\"material\", \"value\":4"); //shale
       count = 0;
       break;
 
     case 5:
-      Serial.println("{\"message\":\"material\", \"value\":\"sandstone\"}");
+      Serial.println("{\"message\":\"material\", \"value\":\5"); //sandstone
       count = 0;
       break;
   }
