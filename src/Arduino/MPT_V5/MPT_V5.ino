@@ -27,6 +27,7 @@
  int count = 0;
  bool newread = true;
  int val = 0;
+ int timerDuration = 5000; //5 second timer
 
 
 void setup() {
@@ -37,7 +38,7 @@ void setup() {
 }
 
 void listendata() {
-  while (millis() < timenow + 5000) { //5 second timer
+  while (millis() < timenow + timerDuration) { //5 second timer
     val = analogRead(0);
     delay(2);
 
