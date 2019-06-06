@@ -37,7 +37,7 @@ void setup() {
 }
 
 void listendata() {
-  while (millis() < timenow + 4000) {
+  while (millis() < timenow + 5000) { //5 second timer
     val = analogRead(0);
     delay(2);
 
