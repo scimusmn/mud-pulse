@@ -17,12 +17,16 @@ export default class App extends Component {
           <MeasurementFromSerialCommunication
             label="button"
             message="button-press"
+            type="bar"
           />
         </div>
         <div className="chart-container">
           <MeasurementFromSerialCommunication
+            backgroundColor="rgb(99, 255, 132)"
             label="potentiometer"
             message="pot-rotation"
+            realtime
+            type="line"
           />
         </div>
       </Fragment>

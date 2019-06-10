@@ -13,5 +13,11 @@ code {
 }
 
 .chart-container {
+  height: 350px;
+  width: 90%;
+  margin: auto;
+}
+
+.chart-wrapper {
   height: 300px;
 }
