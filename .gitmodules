@@ -1,0 +1,3 @@
+[submodule "src/Arduino/ArduinoBaseSketch"]
+	path = src/Arduino/ArduinoBaseSketch
+	url = https://github.com/scimusmn/ArduinoBaseSketch
