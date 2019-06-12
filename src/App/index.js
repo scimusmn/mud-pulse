@@ -24,7 +24,7 @@ export default class App extends Component {
           <MeasurementFromSerialCommunication
             backgroundColor="rgb(99, 255, 132)"
             label="potentiometer"
-            message="pot-rotation"
+            message="pressure-reading"
             realtime
             type="line"
           />
