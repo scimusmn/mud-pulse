@@ -1,3 +1,0 @@
-[submodule "src/Arduino/ArduinoSerialParser"]
-	path = src/Arduino/ArduinoSerialParser
-	url = https://github.com/scimusmn/ArduinoSerialParser
