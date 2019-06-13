@@ -31,9 +31,9 @@ void setup() {
 
   // Parameter 1: pin location
   // Parameter 2: enable averaging to get a less constant stream of data
-  boolean enableAverager = true;
+  boolean enableAverager = false;
   // Parameter 3: enable lowpass filter for Averager to further smooth value
-  boolean enableLowPass = true;
+  boolean enableLowPass = false;
   // Parameter 4: callback
 
   analogInput1.setup(analogInput1Pin, enableAverager, enableLowPass, [](int analogInputValue) {
