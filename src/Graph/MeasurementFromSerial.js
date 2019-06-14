@@ -102,9 +102,11 @@ class MeasurementFromSerial extends Component {
         streaming: {
           afterUpdate: this.afterUpdate,
           delay: 0,
+          duration: 5000,
           frameRate: 30,
           onRefresh: this.refreshData,
           refresh: 50,
+          ttl: 5000,
         },
       };
       chartOptions.scales.xAxes.push({ type: 'realtime' });
@@ -121,12 +123,13 @@ class MeasurementFromSerial extends Component {
   }
 
   refreshData(chart) {
+    // console.log(chart.data.datasets[0].data.length);
     const newData = this.getNewData();
 
     chart.data.datasets[0].data.push({
       // Subtracting a number from x, is a hacky way to move data to the center of the graph
       // TODO: Need to find an elegant way to handle this
-      x: newData.x - 4000,
+      x: newData.x,
       y: newData.y,
     });
 

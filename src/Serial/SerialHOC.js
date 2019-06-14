@@ -39,7 +39,7 @@ const withSerialCommunication = (WrappedComponent) => {
 
     onSerialData(event, arg) {
       let data = {};
-      console.log('onSerialData raw data: ', arg);
+      // console.log('onSerialData raw data: ', arg);
       this.logLine(`onSerialData: ${JSON.stringify(arg)}`);
 
       // TODO: Separate {}{}{} when multiple chunks found
