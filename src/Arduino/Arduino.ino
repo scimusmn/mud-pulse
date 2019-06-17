@@ -31,10 +31,12 @@ void setup() {
 
   // We need to do averaging or we'll crash the app
   boolean enableAverager = true;
+  // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
+  int samplingRate = 500;
   // We don't want use LowPass because that will make the graph not as responsive
   boolean enableLowPass = false;
 
-  analogInput1.setup(analogInput1Pin, enableAverager, enableLowPass, [](int analogInputValue) {
+  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     manager.sendJsonMessage("pressure-reading", analogInputValue);
   });
 

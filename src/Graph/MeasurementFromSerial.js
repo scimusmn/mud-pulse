@@ -81,21 +81,23 @@ class MeasurementFromSerial extends Component {
     const { realtime } = this.state;
 
     let chartOptions = {
-      maintainAspectRatio: false,
-      plugins: {},
-      layout: {
-        padding: {
-          right: 0,
-        },
+      animations: {
+        duration: 0,
       },
+      hover: {
+        animationDuration: 0,
+      },
+      maintainAspectRatio: false,
+      responsiveAnimationDuration: 0,
+      plugins: {},
       scales: {
         xAxes: [],
         yAxes: [
           {
             ticks: {
-              // max: 1023,
-              // min: 0,
-              // stepSize: 200,
+              max: 1023,
+              min: 0,
+              stepSize: 200,
             },
           },
         ],
@@ -108,11 +110,11 @@ class MeasurementFromSerial extends Component {
         streaming: {
           afterUpdate: this.afterUpdate,
           delay: 0,
-          duration: 5000,
-          frameRate: 30,
+          duration: 10000,
+          frameRate: 20,
           onRefresh: this.refreshData,
-          refresh: 50,
-          ttl: 5000,
+          refresh: 100,
+          ttl: 10000,
         },
       };
       chartOptions.scales.xAxes.push({ type: 'realtime' });
@@ -178,6 +180,7 @@ class MeasurementFromSerial extends Component {
         backgroundColor,
         borderColor,
         label,
+        lineTension: 0,
         data: chartData,
       }],
       labels: chartLabels,
