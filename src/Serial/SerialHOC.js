@@ -62,8 +62,8 @@ const withSerialCommunication = (WrappedComponent) => {
 
     sendData(data) {
       const { ipcAvailable } = this.state;
-      console.log('From sendData HOC: ', data);
-      console.log('ipcAvailable: ', ipcAvailable);
+      // console.log('From sendData HOC: ', data);
+      // console.log('ipcAvailable: ', ipcAvailable);
       if (ipcAvailable) {
         this.logLine(`sendData: ${data}`);
         this.ipcRenderer.send(IPC.RENDERER_TO_SERIAL, data);
