@@ -7,7 +7,6 @@ import propTypes from 'prop-types';
 import moment from 'moment';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
-
 import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
 import withSerialCommunication from '../Serial/SerialHOC';
 
