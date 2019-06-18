@@ -27,6 +27,7 @@ export default class App extends Component {
             message="pressure-reading"
             realtime
             type="line"
+            yMax={1023}
           />
         </div>
       </Fragment>

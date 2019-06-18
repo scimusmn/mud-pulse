@@ -25,6 +25,8 @@ class MeasurementFromSerial extends Component {
       newData: {},
       realtime: props.realtime,
       type: props.type,
+      yMax: props.yMax,
+      yMin: props.yMin,
     };
 
     this.checkHandshake = this.checkHandshake.bind(this);
@@ -78,7 +80,7 @@ class MeasurementFromSerial extends Component {
 
   getChartOptions() {
     /* eslint prefer-const: 0 */
-    const { realtime } = this.state;
+    const { realtime, yMax, yMin } = this.state;
 
     let chartOptions = {
       animations: {
@@ -95,9 +97,8 @@ class MeasurementFromSerial extends Component {
         yAxes: [
           {
             ticks: {
-              max: 1023,
-              min: 0,
-              stepSize: 200,
+              max: yMax,
+              min: yMin,
             },
           },
         ],
@@ -131,12 +132,12 @@ class MeasurementFromSerial extends Component {
   }
 
   refreshData(chart) {
-    // console.log(chart.data.datasets[0].data.length);
     const newData = this.getNewData();
 
     chart.data.datasets[0].data.push({
-      // Subtracting a number from x, is a hacky way to move data to the center of the graph
-      // TODO: Need to find an elegant way to handle this
+      // Subtracting a number from x, is a hacky way to move data
+      // to the center of the graph, if we need it
+
       x: newData.x,
       y: newData.y,
     });
@@ -159,10 +160,13 @@ class MeasurementFromSerial extends Component {
   checkHandshake() {
     const { sendData } = this.props;
     const { handshake } = this.state;
-    sendData(WAKE_ARDUINO);
-    setTimeout(() => {
-      if (!handshake) this.checkHandshake();
-    }, 3000);
+
+    if (!handshake) {
+      sendData(WAKE_ARDUINO);
+      setTimeout(() => {
+        this.checkHandshake();
+      }, 3000);
+    }
   }
 
   render() {
@@ -215,6 +219,8 @@ MeasurementFromSerial.propTypes = {
   sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,
+  yMax: propTypes.number,
+  yMin: propTypes.number,
 };
 
 MeasurementFromSerial.defaultProps = {
@@ -222,6 +228,8 @@ MeasurementFromSerial.defaultProps = {
   borderColor: 'rgb(255, 99, 132)',
   realtime: false,
   type: 'bar',
+  yMax: 1,
+  yMin: 0,
 };
 
 const MeasurementFromSerialCommunication = withSerialCommunication(MeasurementFromSerial);
