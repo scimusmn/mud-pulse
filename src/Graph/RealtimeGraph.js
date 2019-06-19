@@ -4,13 +4,12 @@ import {
   Button,
 } from 'reactstrap';
 import propTypes from 'prop-types';
-import moment from 'moment';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
 import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
 import withSerialCommunication from '../Serial/SerialHOC';
 
-class MeasurementFromSerial extends Component {
+class RealtimeGraph extends Component {
   constructor(props) {
     super(props);
 
@@ -23,7 +22,6 @@ class MeasurementFromSerial extends Component {
       label: props.label,
       message: props.message,
       newData: {},
-      realtime: props.realtime,
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
@@ -45,31 +43,23 @@ class MeasurementFromSerial extends Component {
   }
 
   shouldComponentUpdate() {
-    const { realtime } = this.state;
-    return !realtime;
+    return false;
   }
 
   onData(data) {
-    const { message, realtime } = this.state;
+    const { message } = this.state;
 
     if (data.message === message) {
-      if (realtime) {
-        const newData = {
-          x: Date.now(),
-          y: data.value,
-        };
+      const newData = {
+        x: Date.now(),
+        y: data.value,
+      };
 
-        this.setState(prevState => ({
-          chartData: prevState.chartData.concat(data.value),
-          chartLabels: prevState.chartLabels.concat(Date.now()),
-          newData,
-        }));
-      } else {
-        this.setState(prevState => ({
-          chartData: prevState.chartData.concat(data.value),
-          chartLabels: prevState.chartLabels.concat(moment(moment.now()).format('h:mm:s')),
-        }));
-      }
+      this.setState(prevState => ({
+        chartData: prevState.chartData.concat(data.value),
+        chartLabels: prevState.chartLabels.concat(Date.now()),
+        newData,
+      }));
     }
   }
 
@@ -80,7 +70,7 @@ class MeasurementFromSerial extends Component {
 
   getChartOptions() {
     /* eslint prefer-const: 0 */
-    const { realtime, yMax, yMin } = this.state;
+    const { yMax, yMin } = this.state;
 
     let chartOptions = {
       animations: {
@@ -91,36 +81,35 @@ class MeasurementFromSerial extends Component {
       },
       maintainAspectRatio: false,
       responsiveAnimationDuration: 0,
-      plugins: {},
+      plugins: {
+        streaming: {
+          afterUpdate: this.afterUpdate,
+          delay: 0,
+          duration: 5000,
+          frameRate: 20,
+          onRefresh: this.refreshData,
+          refresh: 100,
+          ttl: 5000,
+        },
+      },
       scales: {
-        xAxes: [],
+        xAxes: [
+          {
+            type: 'realtime',
+          },
+        ],
         yAxes: [
           {
             ticks: {
               max: yMax,
               min: yMin,
+              stepSize: 200,
             },
           },
         ],
       },
       spanGaps: true,
     };
-
-    if (realtime) {
-      chartOptions.plugins = {
-        streaming: {
-          afterUpdate: this.afterUpdate,
-          delay: 0,
-          duration: 10000,
-          frameRate: 20,
-          onRefresh: this.refreshData,
-          refresh: 100,
-          ttl: 10000,
-        },
-      };
-      chartOptions.scales.xAxes.push({ type: 'realtime' });
-      chartOptions.spanGaps = true;
-    }
 
     return chartOptions;
   }
@@ -210,12 +199,11 @@ class MeasurementFromSerial extends Component {
   }
 }
 
-MeasurementFromSerial.propTypes = {
+RealtimeGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
   label: propTypes.string.isRequired,
   message: propTypes.string.isRequired,
-  realtime: propTypes.bool,
   sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,
@@ -223,15 +211,14 @@ MeasurementFromSerial.propTypes = {
   yMin: propTypes.number,
 };
 
-MeasurementFromSerial.defaultProps = {
+RealtimeGraph.defaultProps = {
   backgroundColor: 'rgb(255, 99, 132)',
   borderColor: 'rgb(255, 99, 132)',
-  realtime: false,
   type: 'bar',
   yMax: 1,
   yMin: 0,
 };
 
-const MeasurementFromSerialCommunication = withSerialCommunication(MeasurementFromSerial);
+const RealtimeGraphWithSerialCommunication = withSerialCommunication(RealtimeGraph);
 
-export default MeasurementFromSerialCommunication;
+export default RealtimeGraphWithSerialCommunication;
