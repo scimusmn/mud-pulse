@@ -21,18 +21,20 @@ int val = 0;
 int timerDuration = 5000; //5 second timer
 
 void setup() {
+  // Enables/disables debug messaging from ArduinoJson
+  boolean arduinoJsonDebug = false;
 
   // Ensure Serial Port is open and ready to communicate
   serialManager.setup(baudRate, [](char* message, int value) {
     onParse(message, value);
-  });
+  }, arduinoJsonDebug);
 
   // ANALOG INPUTS
 
   // We need to do averaging or we'll crash the app
   boolean enableAverager = true;
   // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 300;
+  int samplingRate = 200;
   // We don't want use LowPass because that will make the graph not as responsive
   boolean enableLowPass = false;
 
@@ -101,6 +103,9 @@ void listenData() {
 void onParse(char* message, int value) {
   if (strcmp(message, "pressure-reading") == 0 && value == 1) {
     serialManager.sendJsonMessage(message, analogInput1.readValue());
+  }
+  else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
+    serialManager.sendJsonMessage("arduino-ready", 1);
   }
   else {
     serialManager.sendJsonMessage("unknown-command", 1);
