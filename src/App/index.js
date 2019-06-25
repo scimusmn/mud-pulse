@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import './App.css';
+import Loading from '../Loading';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
 import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
@@ -12,41 +13,52 @@ class App extends Component {
     this.state = {
       handshake: false,
     };
+
+    this.checkHandshake = this.checkHandshake.bind(this);
+    this.onSerialData = this.onSerialData.bind(this);
+    this.updateHandshake = this.updateHandshake.bind(this);
   }
 
   componentDidMount() {
     const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onData);
+    setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
     this.checkHandshake();
   }
 
-  shouldComponentUpdate() {
-    const { realtime } = this.state;
-    return !realtime;
-  }
+  onSerialData(data) {
+    const { handshake } = this.state;
 
-  onData(data) {
-    /* eslint no-console: 0 */
-    /* eslint class-methods-use-this: 0 */
-    if (data.message === 'button-press') {
-      console.log('Button was pressed');
+    if (data.message === 'arduino-ready' && !handshake) {
+      this.updateHandshake();
     }
   }
 
   checkHandshake() {
     const { sendData } = this.props;
-    const { handshake } = this.state;
 
-    if (!handshake) {
-      sendData(WAKE_ARDUINO);
-      setTimeout(() => {
-        this.checkHandshake();
-      }, 3000);
-    }
+    sendData(WAKE_ARDUINO);
+
+    setTimeout(() => {
+      this.checkHandshake();
+    }, 10000);
+  }
+
+  updateHandshake() {
+    this.setState({
+      handshake: true,
+    });
   }
 
   render() {
+    const { handshake } = this.state;
+
+    if (!handshake) {
+      return (
+        <Loading />
+      );
+    }
+
     return (
       <Fragment>
         <div className="chart-container">

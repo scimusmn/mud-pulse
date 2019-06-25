@@ -7,7 +7,6 @@ import propTypes from 'prop-types';
 import moment from 'moment';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
-import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
 import withSerialCommunication from '../Serial/SerialHOC';
 
 class PeriodicGraph extends Component {
@@ -19,7 +18,6 @@ class PeriodicGraph extends Component {
       borderColor: props.borderColor,
       chartData: [],
       chartLabels: [],
-      handshake: false,
       label: props.label,
       message: props.message,
       sampling: false,
@@ -28,7 +26,6 @@ class PeriodicGraph extends Component {
       yMin: props.yMin,
     };
 
-    this.checkHandshake = this.checkHandshake.bind(this);
     this.onData = this.onData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
@@ -37,7 +34,6 @@ class PeriodicGraph extends Component {
     const { setOnDataCallback } = this.props;
     setOnDataCallback(this.onData);
     document.addEventListener('keydown', this.handleReset);
-    this.checkHandshake();
   }
 
   shouldComponentUpdate() {
@@ -64,7 +60,7 @@ class PeriodicGraph extends Component {
 
     // Getting Material
     if (data.message === 'material') {
-      let rock;
+      let rock = '';
       switch (data.value) {
         case 2:
           rock = 'Limestone';
@@ -79,7 +75,7 @@ class PeriodicGraph extends Component {
           rock = 'Sandstone';
           break;
         default:
-          rock = '';
+          break;
       }
 
       if (rock !== '') {
@@ -134,18 +130,6 @@ class PeriodicGraph extends Component {
     });
   }
 
-  checkHandshake() {
-    const { sendData } = this.props;
-    const { handshake } = this.state;
-
-    if (!handshake) {
-      sendData(WAKE_ARDUINO);
-      setTimeout(() => {
-        this.checkHandshake();
-      }, 3000);
-    }
-  }
-
   render() {
     /* eslint no-return-assign: 0 */
     const {
@@ -193,7 +177,6 @@ PeriodicGraph.propTypes = {
   borderColor: propTypes.string,
   label: propTypes.string.isRequired,
   message: propTypes.string.isRequired,
-  sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,

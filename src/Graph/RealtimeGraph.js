@@ -6,7 +6,6 @@ import {
 import propTypes from 'prop-types';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
-import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
 import withSerialCommunication from '../Serial/SerialHOC';
 
 class RealtimeGraph extends Component {
@@ -18,7 +17,6 @@ class RealtimeGraph extends Component {
       borderColor: props.borderColor,
       chartData: [],
       chartLabels: [],
-      handshake: false,
       label: props.label,
       message: props.message,
       newData: {},
@@ -27,7 +25,6 @@ class RealtimeGraph extends Component {
       yMin: props.yMin,
     };
 
-    this.checkHandshake = this.checkHandshake.bind(this);
     this.clearNewData = this.clearNewData.bind(this);
     this.getNewData = this.getNewData.bind(this);
     this.onData = this.onData.bind(this);
@@ -39,7 +36,6 @@ class RealtimeGraph extends Component {
     const { setOnDataCallback } = this.props;
     setOnDataCallback(this.onData);
     document.addEventListener('keydown', this.handleReset);
-    this.checkHandshake();
   }
 
   shouldComponentUpdate() {
@@ -146,18 +142,6 @@ class RealtimeGraph extends Component {
     });
   }
 
-  checkHandshake() {
-    const { sendData } = this.props;
-    const { handshake } = this.state;
-
-    if (!handshake) {
-      sendData(WAKE_ARDUINO);
-      setTimeout(() => {
-        this.checkHandshake();
-      }, 3000);
-    }
-  }
-
   render() {
     const {
       backgroundColor,
@@ -204,7 +188,6 @@ RealtimeGraph.propTypes = {
   borderColor: propTypes.string,
   label: propTypes.string.isRequired,
   message: propTypes.string.isRequired,
-  sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,
