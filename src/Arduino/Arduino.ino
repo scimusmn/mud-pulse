@@ -2,7 +2,7 @@
 #include "arduino-base/Libraries/Button.h"
 #include "arduino-base/Libraries/SerialManager.h"
 
-SerialManager manager;
+SerialManager serialManager;
 
 long baudRate = 115200;
 
@@ -10,8 +10,8 @@ AnalogInput analogInput1;
 Button button1;
 
 // Pin assignments
-int analogInput1Pin = A0;
-int button1Pin = 2;
+#define analogInput1Pin A0
+#define button1Pin 2
 
 boolean doPolling = false;
 long timeNow = 0;
@@ -23,7 +23,7 @@ int timerDuration = 5000; //5 second timer
 void setup() {
 
   // Ensure Serial Port is open and ready to communicate
-  manager.setup(baudRate, [](String message, int value) {
+  serialManager.setup(baudRate, [](char* message, int value) {
     onParse(message, value);
   });
 
@@ -32,12 +32,12 @@ void setup() {
   // We need to do averaging or we'll crash the app
   boolean enableAverager = true;
   // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 500;
+  int samplingRate = 300;
   // We don't want use LowPass because that will make the graph not as responsive
   boolean enableLowPass = false;
 
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
-    manager.sendJsonMessage("pressure-reading", analogInputValue);
+    serialManager.sendJsonMessage("pressure-reading", analogInputValue);
   });
 
   // DIGITAL INPUTS
@@ -50,17 +50,16 @@ void setup() {
       if (doPolling == false) {
         doPolling = true;
         timeNow = millis();
-        manager.sendJsonMessage("button-press", 1);
+        serialManager.sendJsonMessage("button-press", 1);
       }
     }
   });
 }
 
 void loop() {
-  manager.idle();
-
   analogInput1.idle();
   button1.idle();
+  serialManager.idle();
 
   if (doPolling == true) {
     listenData();
@@ -72,8 +71,8 @@ void loop() {
     // 5: Sandstone
 
     if (count > 1 && count < 5) {
-        manager.sendJsonMessage("material", count);
-        count = 0;
+      serialManager.sendJsonMessage("material", count);
+      count = 0;
     }
   }
 }
@@ -95,15 +94,15 @@ void listenData() {
   }
   else {
     doPolling = false;
-    manager.sendJsonMessage("time-up", 1);
+    serialManager.sendJsonMessage("time-up", 1);
   }
 }
 
-void onParse(String message, int value) {
-  if (message == "\"pressure-reading\"" && value == 1) {
-    manager.sendJsonMessage("pressure-reading", analogInput1.readValue());
+void onParse(char* message, int value) {
+  if (strcmp(message, "pressure-reading") == 0 && value == 1) {
+    serialManager.sendJsonMessage(message, analogInput1.readValue());
   }
   else {
-    manager.sendJsonMessage("unknown-command", 1);
+    serialManager.sendJsonMessage("unknown-command", 1);
   }
 }
