@@ -26,13 +26,13 @@ class PeriodicGraph extends Component {
       yMin: props.yMin,
     };
 
-    this.onData = this.onData.bind(this);
+    this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
 
   componentDidMount() {
     const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onData);
+    setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
   }
 
@@ -41,7 +41,7 @@ class PeriodicGraph extends Component {
     return sampling;
   }
 
-  onData(data) {
+  onSerialData(data) {
     const { message, sampling } = this.state;
 
     if (data.message === 'button-press') {
@@ -56,31 +56,6 @@ class PeriodicGraph extends Component {
       this.setState({
         sampling: false,
       });
-    }
-
-    // Getting Material
-    if (data.message === 'material') {
-      let rock = '';
-      switch (data.value) {
-        case 2:
-          rock = 'Limestone';
-          break;
-        case 3:
-          rock = 'Dolomite';
-          break;
-        case 4:
-          rock = 'Shale';
-          break;
-        case 5:
-          rock = 'Sandstone';
-          break;
-        default:
-          break;
-      }
-
-      if (rock !== '') {
-        console.log(`You've hit ${rock}!`);
-      }
     }
 
     if (data.message === message && sampling) {
