@@ -4,7 +4,7 @@ import './App.css';
 import Loading from '../Loading';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
-import { WAKE_ARDUINO } from '../Serial/arduinoConstants';
+import { ARDUINO_READY, WAKE_ARDUINO } from '../Serial/arduinoConstants';
 import withSerialCommunication from '../Serial/SerialHOC';
 
 class App extends Component {
@@ -29,7 +29,7 @@ class App extends Component {
   onSerialData(data) {
     const { handshake } = this.state;
 
-    if (data.message === 'arduino-ready' && !handshake) {
+    if (data.message === ARDUINO_READY.message && !handshake) {
       this.updateHandshake();
     }
   }
@@ -37,11 +37,11 @@ class App extends Component {
   checkHandshake() {
     const { sendData } = this.props;
 
-    sendData(WAKE_ARDUINO);
+    sendData(JSON.stringify(WAKE_ARDUINO));
 
     setTimeout(() => {
       this.checkHandshake();
-    }, 10000);
+    }, 5000);
   }
 
   updateHandshake() {
