@@ -145,9 +145,10 @@ class PeriodicGraph extends Component {
       datasets: [{
         backgroundColor,
         borderColor,
+        data: chartData,
         label,
         lineTension: 0,
-        data: chartData,
+        pointRadius: 0,
       }],
       labels: chartLabels,
     };

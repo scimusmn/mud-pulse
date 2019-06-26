@@ -69,7 +69,7 @@ class RealtimeGraph extends Component {
     const { yMax, yMin } = this.state;
 
     let chartOptions = {
-      animations: {
+      animation: {
         duration: 0,
       },
       hover: {
@@ -156,9 +156,11 @@ class RealtimeGraph extends Component {
       datasets: [{
         backgroundColor,
         borderColor,
+        data: chartData,
+        fill: false,
         label,
         lineTension: 0,
-        data: chartData,
+        pointRadius: 0,
       }],
       labels: chartLabels,
     };
