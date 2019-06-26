@@ -1,7 +1,12 @@
 import React, { Component, Fragment } from 'react';
+import {
+  Card, Col, Row,
+} from 'reactstrap';
 import propTypes from 'prop-types';
 import './App.css';
 import Loading from '../Loading';
+import Banner from '../Banner';
+import DashboardWithSerialCommunication from '../Dashboard';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Serial/arduinoConstants';
@@ -61,23 +66,37 @@ class App extends Component {
 
     return (
       <Fragment>
-        <div className="chart-container">
-          <PeriodicGraphWithSerialCommunication
-            label="pulses"
-            message="pressure-reading"
-            type="line"
-            yMax={1023}
-          />
-        </div>
-        <div className="chart-container">
-          <RealtimeGraphWithSerialCommunication
-            backgroundColor="rgb(99, 255, 132)"
-            label="realtime"
-            message="pressure-reading"
-            type="line"
-            yMax={1023}
-          />
-        </div>
+        <Row>
+          <Banner />
+        </Row>
+        <Row>
+          <Col md={6}>
+            <Card>
+              <PeriodicGraphWithSerialCommunication
+                label="pulses"
+                message="pressure-reading"
+                type="line"
+                yMax={1023}
+              />
+            </Card>
+          </Col>
+          <Col md={6}>
+            <Card>
+              <DashboardWithSerialCommunication />
+            </Card>
+          </Col>
+        </Row>
+        <Row>
+          <Col md={12}>
+            <RealtimeGraphWithSerialCommunication
+              backgroundColor="rgb(99, 255, 132)"
+              label="realtime"
+              message="pressure-reading"
+              type="line"
+              yMax={1023}
+            />
+          </Col>
+        </Row>
       </Fragment>
     );
   }

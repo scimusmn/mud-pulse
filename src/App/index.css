@@ -12,6 +12,11 @@ code {
     monospace;
 }
 
+#dashboard {
+  height: 350px;
+  border: 1px solid #000;
+}
+
 .chart-container {
   height: 350px;
   width: 90%;
