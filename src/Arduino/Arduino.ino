@@ -67,11 +67,6 @@ void loop() {
     listenData();
   }
   else {
-    // 2: Limestone
-    // 3: Dolomite
-    // 4: Shale
-    // 5: Sandstone
-
     if (count > 1 && count < 5) {
       serialManager.sendJsonMessage("material", count);
       count = 0;
