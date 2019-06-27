@@ -1,8 +1,5 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
-import {
-  Button,
-} from 'reactstrap';
 import propTypes from 'prop-types';
 import moment from 'moment';
 import ChartComponent from 'react-chartjs-2';
@@ -137,12 +134,6 @@ class PeriodicGraph extends Component {
             type={type}
           />
         </div>
-        <Button
-          color="danger"
-          onClick={this.resetGraph}
-        >
-          Reset Graph
-        </Button>
       </Fragment>
     );
   }

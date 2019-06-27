@@ -1,0 +1,9 @@
+#banner {
+  height: 100px !important;
+}
+
+#bannerHeader {
+  font-family: fantasy;
+  font-size: 3.5em;
+  vertical-align: middle;
+}

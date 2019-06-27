@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import {
-  Card, Col, Row,
+  Card, Col, Container, Row,
 } from 'reactstrap';
 import propTypes from 'prop-types';
 import './App.css';
@@ -66,37 +66,55 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Row>
-          <Banner />
-        </Row>
-        <Row>
-          <Col md={6}>
-            <Card>
-              <PeriodicGraphWithSerialCommunication
-                label="pulses"
-                message="pressure-reading"
-                type="line"
-                yMax={1023}
-              />
-            </Card>
-          </Col>
-          <Col md={6}>
-            <Card>
-              <DashboardWithSerialCommunication />
-            </Card>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={12}>
-            <RealtimeGraphWithSerialCommunication
-              backgroundColor="rgb(99, 255, 132)"
-              label="realtime"
-              message="pressure-reading"
-              type="line"
-              yMax={1023}
-            />
-          </Col>
-        </Row>
+        <Container fluid>
+          <Row>
+            <Banner backgroundColor="#666" />
+          </Row>
+          <Row id="sampleRow">
+            <Col md={6}>
+              <Card>
+                <PeriodicGraphWithSerialCommunication
+                  label="Sampled Pulses"
+                  message="pressure-reading"
+                  type="line"
+                  yMax={1023}
+                />
+              </Card>
+            </Col>
+            <Col md={6}>
+              <Card>
+                <DashboardWithSerialCommunication />
+              </Card>
+            </Col>
+          </Row>
+          <Row>
+            <Col md={12}>
+              <div id="scopeContainer" className="mx-auto my-5 px-3 py-3">
+                <Container fluid>
+                  <Row>
+                    <h2 id="scopeName" className="px-3 py-1">MudPulse 2000XL</h2>
+                  </Row>
+                  <Row>
+                    <Col md={9} className="pl-0">
+                      <div id="scopeGraph" className="py-3">
+                        <RealtimeGraphWithSerialCommunication
+                          borderColor="#FFFF00"
+                          gridColor="#444"
+                          message="pressure-reading"
+                          type="line"
+                          yMax={1023}
+                        />
+                      </div>
+                    </Col>
+                    <Col md={3}>
+                      <img className="mx-auto d-block" src="panel.png" alt="" />
+                    </Col>
+                  </Row>
+                </Container>
+              </div>
+            </Col>
+          </Row>
+        </Container>
       </Fragment>
     );
   }
