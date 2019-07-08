@@ -23,14 +23,14 @@ class RealtimeGraph extends Component {
 
     this.clearNewData = this.clearNewData.bind(this);
     this.getNewData = this.getNewData.bind(this);
-    this.onData = this.onData.bind(this);
+    this.onSerialData = this.onSerialData.bind(this);
     this.refreshData = this.refreshData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
 
   componentDidMount() {
     const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onData);
+    setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
   }
 
@@ -38,7 +38,7 @@ class RealtimeGraph extends Component {
     return false;
   }
 
-  onData(data) {
+  onSerialData(data) {
     const { message } = this.state;
 
     if (data.message === message) {
@@ -61,10 +61,8 @@ class RealtimeGraph extends Component {
   }
 
   getChartOptions() {
-    /* eslint prefer-const: 0 */
     const { gridColor, yMax, yMin } = this.state;
-
-    let chartOptions = {
+    const chartOptions = {
       animation: {
         duration: 0,
       },

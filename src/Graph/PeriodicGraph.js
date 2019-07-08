@@ -17,12 +17,17 @@ class PeriodicGraph extends Component {
       chartLabels: [],
       label: props.label,
       message: props.message,
+      newData: {},
       sampling: false,
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
     };
 
+    this.clearNewData = this.clearNewData.bind(this);
+    this.getNewData = this.getNewData.bind(this);
+    this.onSerialData = this.onSerialData.bind(this);
+    this.refreshData = this.refreshData.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
@@ -56,6 +61,19 @@ class PeriodicGraph extends Component {
     }
 
     if (data.message === message && sampling) {
+      const newData = {
+        x: Date.now(),
+        y: data.value,
+      };
+
+      this.setState(prevState => ({
+        chartData: prevState.chartData.concat(data.value),
+        chartLabels: prevState.chartLabels.concat(Date.now()),
+        newData,
+      }));
+    }
+
+    if (data.message === message && sampling) {
       this.setState(prevState => ({
         chartData: prevState.chartData.concat(data.value),
         chartLabels: prevState.chartLabels.concat(moment(moment.now()).format('h:mm:s')),
@@ -64,21 +82,37 @@ class PeriodicGraph extends Component {
   }
 
   getChartOptions() {
-    /* eslint prefer-const: 0 */
-    const { yMax, yMin } = this.state;
-
-    let chartOptions = {
-      animations: {
+    const { sampling, yMax, yMin } = this.state;
+    const chartOptions = {
+      animation: {
         duration: 0,
       },
       hover: {
         animationDuration: 0,
       },
+      legend: {
+        display: false,
+      },
       maintainAspectRatio: false,
       responsiveAnimationDuration: 0,
-      plugins: {},
+      plugins: {
+        streaming: {
+          afterUpdate: this.afterUpdate,
+          delay: 0,
+          duration: 5000,
+          frameRate: 20,
+          onRefresh: this.refreshData,
+          pause: !sampling,
+          refresh: 100,
+          ttl: 5000,
+        },
+      },
       scales: {
-        xAxes: [],
+        xAxes: [
+          {
+            type: 'realtime',
+          },
+        ],
         yAxes: [
           {
             ticks: {
@@ -95,10 +129,40 @@ class PeriodicGraph extends Component {
     return chartOptions;
   }
 
+  getNewData() {
+    const { newData } = this.state;
+    return newData;
+  }
+
+  clearNewData() {
+    this.setState({
+      newData: {},
+    });
+  }
+
+  refreshData(chart) {
+    const newData = this.getNewData();
+
+    chart.data.datasets[0].data.push({
+      // Subtracting a number from x, is a hacky way to move data
+      // to the center of the graph, if we need it
+
+      x: newData.x,
+      y: newData.y,
+    });
+
+    chart.update({
+      preservation: true,
+    });
+
+    this.clearNewData();
+  }
+
   resetGraph() {
     this.setState({
       chartData: [],
       chartLabels: [],
+      newData: {},
     });
   }
 
