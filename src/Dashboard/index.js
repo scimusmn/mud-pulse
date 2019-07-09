@@ -8,6 +8,7 @@ class Dashboard extends Component {
     super(props);
     this.state = {
       rock: '',
+      status: 'waiting',
     };
 
     this.onSerialData = this.onSerialData.bind(this);
@@ -21,28 +22,40 @@ class Dashboard extends Component {
   }
 
   onSerialData(data) {
+    if (data.message === 'button-press') {
+      this.setState({
+        status: 'graphing',
+      });
+    }
+
     if (data.message === 'material') {
       let rock = '';
       switch (data.value) {
         case 2:
-          rock = 'Limestone';
+          rock = 'You\'ve hit Limestone!';
           break;
         case 3:
-          rock = 'Dolomite';
+          rock = 'You\'ve hit Dolomite!';
           break;
         case 4:
-          rock = 'Shale';
+          rock = 'You\'ve hit Shale!';
           break;
         case 5:
-          rock = 'Sandstone';
+          rock = 'You\'ve hit Sandstone!';
           break;
         default:
+          rock = 'Invalid pulse information. Please try again!';
           break;
       }
 
-      if (rock !== '') {
-        this.updatePulse(rock);
-      }
+      this.updatePulse(rock);
+    }
+
+    // Ending sampling
+    if (data.message === 'time-up') {
+      this.setState({
+        status: 'waiting',
+      });
     }
   }
 
@@ -65,10 +78,32 @@ class Dashboard extends Component {
       return ('Nothing yet');
     };
 
+    const dashboardStatus = () => {
+      /* eslint prefer-const: 0 */
+      const { status } = this.state;
+      let statusMessage = '';
+
+      switch (status) {
+        case 'graphing':
+          statusMessage = 'Graphing...';
+          break;
+        case 'waiting':
+          statusMessage = 'Click the button to begin detection.';
+          break;
+        default:
+          break;
+      }
+
+      return (
+        statusMessage
+      );
+    };
+
     return (
       <Fragment>
-        <div id="dashboard">
-          {rockElement()}
+        <div id="dashboard" className="px-2 py-2">
+          <h3>{dashboardStatus()}</h3>
+          <h4>{rockElement()}</h4>
         </div>
       </Fragment>
     );

@@ -6,8 +6,8 @@ import './index.css';
 
 const Banner = () => (
   <Fragment>
-    <Jumbotron id="banner" className="w-100 text-center">
-      <h1 id="bannerHeader">Mud Pulse Telemetry!</h1>
+    <Jumbotron id="banner" className="w-100 text-center py-0">
+      <h1 id="bannerHeader" className="mb-0">Mud Pulse Telemetry!</h1>
     </Jumbotron>
   </Fragment>
 );
