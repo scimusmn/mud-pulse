@@ -95,7 +95,7 @@ class App extends Component {
                     <h2 id="scopeName" className="px-3 py-1">MudPulse 2000XL</h2>
                   </Row>
                   <Row>
-                    <Col md={9} className="pl-0">
+                    <Col md={9} className="px-0">
                       <div id="scopeGraph" className="py-3">
                         <RealtimeGraphWithSerialCommunication
                           borderColor="#FFFF00"
