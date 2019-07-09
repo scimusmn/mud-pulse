@@ -1,7 +1,6 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
-import moment from 'moment';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
 import withSerialCommunication from '../Serial/SerialHOC';
@@ -13,21 +12,15 @@ class PeriodicGraph extends Component {
     this.state = {
       backgroundColor: props.backgroundColor,
       borderColor: props.borderColor,
-      chartData: [],
-      chartLabels: [],
-      label: props.label,
       message: props.message,
-      newData: {},
-      sampling: false,
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
     };
 
-    this.clearNewData = this.clearNewData.bind(this);
-    this.getNewData = this.getNewData.bind(this);
+    this.chartReference = {};
+
     this.onSerialData = this.onSerialData.bind(this);
-    this.refreshData = this.refreshData.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
@@ -39,50 +32,37 @@ class PeriodicGraph extends Component {
   }
 
   shouldComponentUpdate() {
-    const { sampling } = this.state;
-    return sampling;
+    return false;
   }
 
   onSerialData(data) {
-    const { message, sampling } = this.state;
+    const { message } = this.state;
 
     if (data.message === 'button-press') {
       this.resetGraph();
-      this.setState({
-        sampling: true,
-      });
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
     }
 
     // Ending sampling
     if (data.message === 'time-up') {
-      this.setState({
-        sampling: false,
-      });
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
     }
 
-    if (data.message === message && sampling) {
-      const newData = {
+    if (data.message === message
+      && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
+      this.chartReference.chartInstance.config.data.datasets[0].data.push({
         x: Date.now(),
         y: data.value,
-      };
+      });
 
-      this.setState(prevState => ({
-        chartData: prevState.chartData.concat(data.value),
-        chartLabels: prevState.chartLabels.concat(Date.now()),
-        newData,
-      }));
-    }
-
-    if (data.message === message && sampling) {
-      this.setState(prevState => ({
-        chartData: prevState.chartData.concat(data.value),
-        chartLabels: prevState.chartLabels.concat(moment(moment.now()).format('h:mm:s')),
-      }));
+      this.chartReference.chartInstance.update({
+        preservation: true,
+      });
     }
   }
 
   getChartOptions() {
-    const { sampling, yMax, yMin } = this.state;
+    const { yMax, yMin } = this.state;
     const chartOptions = {
       animation: {
         duration: 0,
@@ -97,12 +77,10 @@ class PeriodicGraph extends Component {
       responsiveAnimationDuration: 0,
       plugins: {
         streaming: {
-          afterUpdate: this.afterUpdate,
           delay: 0,
           duration: 5000,
           frameRate: 20,
-          onRefresh: this.refreshData,
-          pause: !sampling,
+          pause: true,
           refresh: 100,
           ttl: 5000,
         },
@@ -110,6 +88,9 @@ class PeriodicGraph extends Component {
       scales: {
         xAxes: [
           {
+            ticks: {
+              display: false,
+            },
             type: 'realtime',
           },
         ],
@@ -129,41 +110,9 @@ class PeriodicGraph extends Component {
     return chartOptions;
   }
 
-  getNewData() {
-    const { newData } = this.state;
-    return newData;
-  }
-
-  clearNewData() {
-    this.setState({
-      newData: {},
-    });
-  }
-
-  refreshData(chart) {
-    const newData = this.getNewData();
-
-    chart.data.datasets[0].data.push({
-      // Subtracting a number from x, is a hacky way to move data
-      // to the center of the graph, if we need it
-
-      x: newData.x,
-      y: newData.y,
-    });
-
-    chart.update({
-      preservation: true,
-    });
-
-    this.clearNewData();
-  }
-
   resetGraph() {
-    this.setState({
-      chartData: [],
-      chartLabels: [],
-      newData: {},
-    });
+    this.chartReference.chartInstance.config.data.datasets[0].data = [];
+    this.chartReference.chartInstance.update();
   }
 
   render() {
@@ -171,9 +120,6 @@ class PeriodicGraph extends Component {
     const {
       backgroundColor,
       borderColor,
-      chartData,
-      chartLabels,
-      label,
       type,
     } = this.state;
 
@@ -181,13 +127,15 @@ class PeriodicGraph extends Component {
       datasets: [{
         backgroundColor,
         borderColor,
-        data: chartData,
-        label,
+        borderWidth: 1,
+        fill: false,
         lineTension: 0,
         pointRadius: 0,
       }],
-      labels: chartLabels,
     };
+
+    /* eslint arrow-parens: 0 */
+    /* eslint no-return-assign: 0 */
 
     return (
       <Fragment>
@@ -195,6 +143,7 @@ class PeriodicGraph extends Component {
           <ChartComponent
             data={graphData}
             options={this.getChartOptions()}
+            ref={(reference) => this.chartReference = reference}
             type={type}
           />
         </div>
@@ -206,7 +155,6 @@ class PeriodicGraph extends Component {
 PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
-  label: propTypes.string.isRequired,
   message: propTypes.string.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,

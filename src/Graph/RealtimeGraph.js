@@ -11,21 +11,16 @@ class RealtimeGraph extends Component {
 
     this.state = {
       borderColor: props.borderColor,
-      chartData: [],
-      chartLabels: [],
       gridColor: props.gridColor,
       message: props.message,
-      newData: {},
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
     };
 
-    this.clearNewData = this.clearNewData.bind(this);
-    this.getNewData = this.getNewData.bind(this);
+    this.chartReference = {};
+
     this.onSerialData = this.onSerialData.bind(this);
-    this.refreshData = this.refreshData.bind(this);
-    this.resetGraph = this.resetGraph.bind(this);
   }
 
   componentDidMount() {
@@ -42,26 +37,22 @@ class RealtimeGraph extends Component {
     const { message } = this.state;
 
     if (data.message === message) {
-      const newData = {
+      this.chartReference.chartInstance.config.data.datasets[0].data.push({
         x: Date.now(),
         y: data.value,
-      };
+      });
 
-      this.setState(prevState => ({
-        chartData: prevState.chartData.concat(data.value),
-        chartLabels: prevState.chartLabels.concat(Date.now()),
-        newData,
-      }));
+      this.chartReference.chartInstance.update({
+        preservation: true,
+      });
     }
   }
 
-  getNewData() {
-    const { newData } = this.state;
-    return newData;
-  }
-
   getChartOptions() {
-    const { gridColor, yMax, yMin } = this.state;
+    const {
+      gridColor, yMax, yMin,
+    } = this.state;
+
     const chartOptions = {
       animation: {
         duration: 0,
@@ -76,12 +67,9 @@ class RealtimeGraph extends Component {
       responsiveAnimationDuration: 0,
       plugins: {
         streaming: {
-          afterUpdate: this.afterUpdate,
           delay: 0,
           duration: 5000,
           frameRate: 20,
-          onRefresh: this.refreshData,
-          // pause: true,
           refresh: 100,
           ttl: 5000,
         },
@@ -91,6 +79,9 @@ class RealtimeGraph extends Component {
           {
             gridLines: {
               color: gridColor,
+            },
+            ticks: {
+              display: false,
             },
             type: 'realtime',
           },
@@ -114,43 +105,9 @@ class RealtimeGraph extends Component {
     return chartOptions;
   }
 
-  clearNewData() {
-    this.setState({
-      newData: {},
-    });
-  }
-
-  refreshData(chart) {
-    const newData = this.getNewData();
-
-    chart.data.datasets[0].data.push({
-      // Subtracting a number from x, is a hacky way to move data
-      // to the center of the graph, if we need it
-
-      x: newData.x,
-      y: newData.y,
-    });
-
-    chart.update({
-      preservation: true,
-    });
-
-    this.clearNewData();
-  }
-
-  resetGraph() {
-    this.setState({
-      chartData: [],
-      chartLabels: [],
-      newData: {},
-    });
-  }
-
   render() {
     const {
       borderColor,
-      chartData,
-      chartLabels,
       type,
     } = this.state;
 
@@ -158,13 +115,14 @@ class RealtimeGraph extends Component {
       datasets: [{
         borderColor,
         borderWidth: 1,
-        data: chartData,
         fill: false,
         lineTension: 0,
         pointRadius: 0,
       }],
-      labels: chartLabels,
     };
+
+    /* eslint arrow-parens: 0 */
+    /* eslint no-return-assign: 0 */
 
     return (
       <Fragment>
@@ -172,6 +130,7 @@ class RealtimeGraph extends Component {
           <ChartComponent
             data={graphData}
             options={this.getChartOptions()}
+            ref={(reference) => this.chartReference = reference}
             type={type}
           />
         </div>
