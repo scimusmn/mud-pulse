@@ -68,7 +68,13 @@ class Dashboard extends Component {
   render() {
     /* eslint arrow-body-style: 0 */
     const rockElement = () => {
-      const { rock } = this.state;
+      const { rock, status } = this.state;
+      if (status === 'graphing') {
+        return (
+          'Sensing...'
+        );
+      }
+
       if (rock !== '') {
         return (
           rock

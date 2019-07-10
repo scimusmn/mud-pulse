@@ -1,6 +1,9 @@
+// MudPulse
+
 #include "arduino-base/Libraries/AnalogInput.h"
 #include "arduino-base/Libraries/Button.h"
 #include "arduino-base/Libraries/SerialManager.h"
+#include "arduino-base/Libraries/Timer.h"
 
 SerialManager serialManager;
 
@@ -8,17 +11,16 @@ long baudRate = 115200;
 
 AnalogInput analogInput1;
 Button button1;
+Timer timer1;
 
 // Pin assignments
 #define analogInput1Pin A0
 #define button1Pin 2
 
-boolean doPolling = false;
-long timeNow = 0;
 int count = 0;
 bool newread = true;
 int val = 0;
-int timerDuration = 5000; //5 second timer
+int timerDuration = 5000;
 
 void setup() {
   // Enables/disables debug messaging from ArduinoJson
@@ -49,50 +51,43 @@ void setup() {
 
   button1.setup(button1Pin, [](int state) {
     if (state) {
-      if (doPolling == false) {
-        doPolling = true;
-        timeNow = millis();
-        serialManager.sendJsonMessage("button-press", 1);
+      if (timer1.isRunning() == false) {
+        timer1.start();
       }
+
+      serialManager.sendJsonMessage("button-press", 1);
     }
   });
+
+  timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
+    if (running == true) {
+      val = analogRead(0);
+
+      if ((val > 200) && (newread)) {
+        newread = false;
+        count = count + 1;
+      }
+
+      if (val < 190) {
+        newread = true;
+      }
+    }
+    else if (ended == true) {
+      serialManager.sendJsonMessage("time-up", 1);
+
+      if (count > 1 && count < 5) {
+        serialManager.sendJsonMessage("material", count);
+        count = 0;
+      }
+    }
+  }, timerDuration);
 }
 
 void loop() {
   analogInput1.idle();
   button1.idle();
   serialManager.idle();
-
-  if (doPolling == true) {
-    listenData();
-  }
-  else {
-    if (count > 1 && count < 5) {
-      serialManager.sendJsonMessage("material", count);
-      count = 0;
-    }
-  }
-}
-
-void listenData() {
-  // 5 second timer
-  if (millis() < timeNow + timerDuration) {
-    val = analogRead(0);
-    delay(2);
-
-    if ((val > 200) && (newread)) {
-      newread = false;
-      count = count + 1;
-    }
-
-    if (val < 190) {
-      newread = true;
-    }
-  }
-  else {
-    doPolling = false;
-    serialManager.sendJsonMessage("time-up", 1);
-  }
+  timer1.idle();
 }
 
 void onParse(char* message, int value) {
