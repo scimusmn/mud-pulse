@@ -17,7 +17,7 @@ Timer timer1;
 #define analogInput1Pin A0
 #define button1Pin 2
 
-int count = 0;
+int pulseCount = 0;
 bool newread = true;
 int val = 0;
 int timerDuration = 5000;
@@ -52,6 +52,7 @@ void setup() {
   button1.setup(button1Pin, [](int state) {
     if (state) {
       if (timer1.isRunning() == false) {
+        pulseCount = 0;
         timer1.start();
       }
 
@@ -61,11 +62,11 @@ void setup() {
 
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      val = analogRead(0);
+      val = analogInput1.readValue();
 
       if ((val > 200) && (newread)) {
         newread = false;
-        count = count + 1;
+        pulseCount++;
       }
 
       if (val < 190) {
@@ -74,11 +75,7 @@ void setup() {
     }
     else if (ended == true) {
       serialManager.sendJsonMessage("time-up", 1);
-
-      if (count > 1 && count < 5) {
-        serialManager.sendJsonMessage("material", count);
-        count = 0;
-      }
+      serialManager.sendJsonMessage("material", pulseCount);
     }
   }, timerDuration);
 }
