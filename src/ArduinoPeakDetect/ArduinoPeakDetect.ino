@@ -22,7 +22,7 @@ bool newread = true;
 int val = 0;
 int timerDuration = 5000;
 int peakValue = 0;
-int threshold = 50; 
+int threshold = 50;
 
 void setup() {
   // Enables/disables debug messaging from ArduinoJson
@@ -79,24 +79,25 @@ void setup() {
         serialManager.sendJsonMessage("time-up", 1);
         serialManager.sendJsonMessage("material", pulseCount);
       }
-    }, timerDuration);
-  }
+    }
+  }, timerDuration);
+}
 
-  void loop() {
-    analogInput1.idle();
-    button1.idle();
-    serialManager.idle();
-    timer1.idle();
-  }
+void loop() {
+  analogInput1.idle();
+  button1.idle();
+  serialManager.idle();
+  timer1.idle();
+}
 
-  void onParse(char* message, int value) {
-    if (strcmp(message, "pressure-reading") == 0 && value == 1) {
-      serialManager.sendJsonMessage(message, analogInput1.readValue());
-    }
-    else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
-      serialManager.sendJsonMessage("arduino-ready", 1);
-    }
-    else {
-      serialManager.sendJsonMessage("unknown-command", 1);
-    }
+void onParse(char* message, int value) {
+  if (strcmp(message, "pressure-reading") == 0 && value == 1) {
+    serialManager.sendJsonMessage(message, analogInput1.readValue());
   }
+  else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
+    serialManager.sendJsonMessage("arduino-ready", 1);
+  }
+  else {
+    serialManager.sendJsonMessage("unknown-command", 1);
+  }
+}
