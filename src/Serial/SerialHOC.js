@@ -19,6 +19,7 @@ const withSerialCommunication = (WrappedComponent) => {
       this.ipcRenderer = null;
 
       this.checkIpcAvailability = this.checkIpcAvailability.bind(this);
+      this.restartIpcCommunication = this.restartIpcCommunication.bind(this);
       this.sendData = this.sendData.bind(this);
       this.setOnDataCallback = this.setOnDataCallback.bind(this);
       this.startIpcCommunication = this.startIpcCommunication.bind(this);
@@ -92,6 +93,11 @@ const withSerialCommunication = (WrappedComponent) => {
       }
     }
 
+    restartIpcCommunication() {
+      this.stopIpcCommunication();
+      this.startIpcCommunication();
+    }
+
     checkIpcAvailability() {
       if (window.ipcRef) {
         this.logLine('checkIpcAvailability: ipcAvailable: true');
@@ -145,6 +151,7 @@ const withSerialCommunication = (WrappedComponent) => {
       return (
         <React.Fragment>
           <WrappedComponent
+            restartIpcCommunication={this.restartIpcCommunication}
             sendData={this.sendData}
             setOnDataCallback={this.setOnDataCallback}
             ipcAvailable={ipcAvailable}
