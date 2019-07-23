@@ -10,6 +10,7 @@ import DashboardWithSerialCommunication from '../Dashboard';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Serial/arduinoConstants';
+import IPC from '../Serial/IPCMessages';
 import withSerialCommunication from '../Serial/SerialHOC';
 
 class App extends Component {
@@ -17,10 +18,13 @@ class App extends Component {
     super(props);
     this.state = {
       handshake: false,
+      refreshPortCount: 0,
+      pingArduinoStatus: false,
     };
 
-    this.checkHandshake = this.checkHandshake.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
+    this.pingArduino = this.pingArduino.bind(this);
+    this.refreshPorts = this.refreshPorts.bind(this);
     this.updateHandshake = this.updateHandshake.bind(this);
   }
 
@@ -28,25 +32,67 @@ class App extends Component {
     const { setOnDataCallback } = this.props;
     setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
-    this.checkHandshake();
+    this.pingArduino();
   }
 
   onSerialData(data) {
-    const { handshake } = this.state;
+    const { handshake, pingArduinoStatus } = this.state;
 
-    if (data.message === ARDUINO_READY.message && !handshake) {
-      this.updateHandshake();
+    console.log(`from onData: ${pingArduinoStatus}`);
+
+    if (data.message === ARDUINO_READY.message) {
+      if (!handshake) {
+        this.updateHandshake();
+      }
+
+      this.setState({
+        pingArduinoStatus: false,
+      });
     }
   }
 
-  checkHandshake() {
+  pingArduino() {
     const { sendData } = this.props;
+    const { pingArduinoStatus } = this.state;
+
+    console.log(`from Ping: ${pingArduinoStatus}`);
+
+    if (pingArduinoStatus) {
+      this.refreshPorts();
+    }
+
+    this.setState({
+      pingArduinoStatus: true,
+    });
 
     sendData(JSON.stringify(WAKE_ARDUINO));
 
     setTimeout(() => {
-      this.checkHandshake();
+      this.pingArduino();
     }, 5000);
+  }
+
+  refreshPorts() {
+    const { sendData, restartIpcCommunication } = this.props;
+    const { refreshPortCount } = this.state;
+
+    console.log(`refresh count: ${refreshPortCount}`);
+
+    if (refreshPortCount >= 3) {
+      this.setState({
+        handshake: false,
+      });
+
+      console.log('sending RESET-PORT');
+      sendData(IPC.RESET_PORTS_COMMAND);
+
+      console.log('Restarting ipcCommunication');
+      restartIpcCommunication();
+    } else {
+      this.setState(prevState => ({
+        refreshPortCount: prevState.refreshPortCount + 1,
+      }));
+    }
   }
 
   updateHandshake() {
@@ -121,6 +167,7 @@ class App extends Component {
 }
 
 App.propTypes = {
+  restartIpcCommunication: propTypes.func.isRequired,
   sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
 };
