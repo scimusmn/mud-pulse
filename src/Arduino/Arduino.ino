@@ -21,6 +21,8 @@ int pulseCount = 0;
 bool newread = true;
 int val = 0;
 int timerDuration = 5000;
+int peakValue = 0;
+int threshold = 50;
 
 void setup() {
   // Enables/disables debug messaging from ArduinoJson
@@ -62,15 +64,26 @@ void setup() {
 
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
+      // val = analogInput1.readValue();
+      //
+      // if ((val > 200) && (newread)) {
+      //   newread = false;
+      //   pulseCount++;
+      // }
+      //
+      // if (val < 190) {
+      //   newread = true;
+      // }
       val = analogInput1.readValue();
-
-      if ((val > 200) && (newread)) {
-        newread = false;
-        pulseCount++;
+      if (val > peakValue) { // check if it's higher than the current peak:
+        peakValue = val;
       }
-
-      if (val < 190) {
-        newread = true;
+      if (val <= threshold) {
+        if (peakValue > threshold) { //peak detected
+          pulseCount++;
+          //Serial.println(peakValue);
+          peakValue = 0;
+        }
       }
     }
     else if (ended == true) {
