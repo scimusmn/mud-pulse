@@ -21,7 +21,6 @@ class PeriodicGraph extends Component {
     this.chartReference = {};
 
     this.onSerialData = this.onSerialData.bind(this);
-    this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
   }
 
