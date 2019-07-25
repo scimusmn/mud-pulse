@@ -81,7 +81,6 @@ void setup() {
         if (peakValue > threshold && peakDetected) {
           peakDetected = false;
           pulseCount++;
-          Serial.println(pulseCount);
           peakValue = 0;
         }
       }
