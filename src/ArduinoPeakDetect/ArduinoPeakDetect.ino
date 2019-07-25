@@ -17,12 +17,16 @@ Timer timer1;
 #define analogInput1Pin A0
 #define button1Pin 2
 
+int threshold = 50;
+int minThreshold = 100;
 int pulseCount = 0;
 bool newread = true;
 int val = 0;
 int timerDuration = 5000;
 int peakValue = 0;
-int threshold = 50;
+int previousPeak = 0;
+bool peakDetected = true;
+
 
 void setup() {
   // Enables/disables debug messaging from ArduinoJson
@@ -64,16 +68,25 @@ void setup() {
 
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      val = analogInput1.readValue();
+      val = analogRead(A0);
       if (val > peakValue) { // check if it's higher than the current peak:
         peakValue = val;
       }
-      if (val <= threshold) {
-        if (peakValue > threshold) { //peak detected
+      else if (val < 100) {
+        peakValue = 0;
+        previousPeak = 0;
+      }
+      if (val > minThreshold && val <= peakValue - threshold) {
+        previousPeak = peakValue;
+        if (peakValue > threshold && peakDetected) {
+          peakDetected = false;
           pulseCount++;
-          //Serial.println(peakValue);
+          Serial.println(pulseCount);
           peakValue = 0;
         }
+      }
+      if (val >= previousPeak) {
+        peakDetected = true;
       }
       else if (ended == true) {
         serialManager.sendJsonMessage("time-up", 1);
