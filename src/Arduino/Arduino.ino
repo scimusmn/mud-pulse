@@ -64,26 +64,15 @@ void setup() {
 
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      // val = analogInput1.readValue();
-      //
-      // if ((val > 200) && (newread)) {
-      //   newread = false;
-      //   pulseCount++;
-      // }
-      //
-      // if (val < 190) {
-      //   newread = true;
-      // }
       val = analogInput1.readValue();
-      if (val > peakValue) { // check if it's higher than the current peak:
-        peakValue = val;
+
+      if ((val > 200) && (newread)) {
+        newread = false;
+        pulseCount++;
       }
-      if (val <= threshold) {
-        if (peakValue > threshold) { //peak detected
-          pulseCount++;
-          //Serial.println(peakValue);
-          peakValue = 0;
-        }
+
+      if (val < 190) {
+        newread = true;
       }
     }
     else if (ended == true) {
