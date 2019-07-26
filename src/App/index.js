@@ -1,3 +1,4 @@
+/* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
 import {
   Card, Col, Container, Row,
@@ -25,7 +26,6 @@ class App extends Component {
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
-    this.updateHandshake = this.updateHandshake.bind(this);
   }
 
   componentDidMount() {
@@ -36,17 +36,18 @@ class App extends Component {
   }
 
   onSerialData(data) {
-    const { handshake, pingArduinoStatus } = this.state;
-
-    console.log(`from onData: ${pingArduinoStatus}`);
+    const { handshake } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
       if (!handshake) {
-        this.updateHandshake();
+        this.setState({
+          handshake: true,
+        });
       }
 
       this.setState({
         pingArduinoStatus: false,
+        refreshPortCount: 0,
       });
     }
   }
@@ -54,8 +55,6 @@ class App extends Component {
   pingArduino() {
     const { sendData } = this.props;
     const { pingArduinoStatus } = this.state;
-
-    console.log(`from Ping: ${pingArduinoStatus}`);
 
     if (pingArduinoStatus) {
       this.refreshPorts();
@@ -73,12 +72,10 @@ class App extends Component {
   }
 
   refreshPorts() {
-    const { sendData, restartIpcCommunication } = this.props;
+    const { restartIpcCommunication, sendData } = this.props;
     const { refreshPortCount } = this.state;
 
-    console.log(`refresh count: ${refreshPortCount}`);
-
-    if (refreshPortCount >= 3) {
+    if (refreshPortCount === 2) {
       this.setState({
         handshake: false,
       });
@@ -86,19 +83,13 @@ class App extends Component {
       console.log('sending RESET-PORT');
       sendData(IPC.RESET_PORTS_COMMAND);
 
-      console.log('Restarting ipcCommunication');
+      console.log('restarting ipcCommunication...');
       restartIpcCommunication();
-    } else {
-      this.setState(prevState => ({
-        refreshPortCount: prevState.refreshPortCount + 1,
-      }));
     }
-  }
 
-  updateHandshake() {
-    this.setState({
-      handshake: true,
-    });
+    this.setState(prevState => ({
+      refreshPortCount: prevState.refreshPortCount + 1,
+    }));
   }
 
   render() {
