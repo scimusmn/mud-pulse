@@ -17,6 +17,7 @@ Timer timer1;
 #define analogInput1Pin A0
 #define button1Pin 2
 
+int currentAnalogInput1Value = 0;
 int pulseCount = 0;
 bool newread = true;
 int val = 0;
@@ -43,6 +44,7 @@ void setup() {
   boolean enableLowPass = false;
 
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
+    currentAnalogInput1Value = analogInputValue;
     serialManager.sendJsonMessage("pressure-reading", analogInputValue);
   });
 
@@ -64,14 +66,12 @@ void setup() {
 
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      val = analogInput1.readValue();
-
-      if ((val > 200) && (newread)) {
+      if (currentAnalogInput1Value > 250 && newread == true) {
         newread = false;
         pulseCount++;
       }
 
-      if (val < 190) {
+      if (currentAnalogInput1Value < 200) {
         newread = true;
       }
     }
