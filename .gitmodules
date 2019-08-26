@@ -1,3 +1,4 @@
 [submodule "src/Arduino/arduino-base"]
 	path = src/Arduino/arduino-base
 	url = https://github.com/scimusmn/arduino-base
+	branch = react-framework
