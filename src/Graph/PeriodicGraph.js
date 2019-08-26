@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
-import withSerialCommunication from '../Serial/SerialHOC';
+import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 
 class PeriodicGraph extends Component {
   constructor(props) {

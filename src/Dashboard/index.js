@@ -1,7 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import './index.css';
-import withSerialCommunication from '../Serial/SerialHOC';
+import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 
 class Dashboard extends Component {
   constructor(props) {
