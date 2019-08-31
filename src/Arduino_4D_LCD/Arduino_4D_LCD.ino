@@ -52,7 +52,7 @@ void setup() {
   boolean enableLowPass = false;
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
-    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //Map values for scope plot
+    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //map values for scope plot
 
   });
 
@@ -67,7 +67,7 @@ void setup() {
         genie.WriteObject(GENIE_OBJ_FORM, 2, 1); // Get set...caption
         delay(1000);
         genie.WriteObject(GENIE_OBJ_FORM, 3, 1); // Go! caption
-        delay(1000);
+        delay(500);
         for (int i = 0; i < 75; i++) { //clear previous data
           genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0); //write zeros width of scope display
         }
@@ -106,7 +106,7 @@ void setup() {
 
 void loop() {
   analogInput1.idle();
-  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); // Write the mapped values
+  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); //write the mapped values
   button1.idle();
   timer1.idle();
 }
