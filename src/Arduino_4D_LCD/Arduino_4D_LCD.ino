@@ -1,6 +1,6 @@
 //To be used with any 4D Systems Visi-Genie Gauges
 //Reset operation is inverted, so that a 4D systems adaptor sheild is not needed.
-//comnnect TX on display connector to TX on Arduino
+//connect TX on display connector to TX on Arduino
 //connect RX on display connenctor to RX on Arduino
 //DO NOT power display using built-in 5V regulator on Arduino
 //refer to Visi-Genie Gauge documentation for object names
