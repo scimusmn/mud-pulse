@@ -9,16 +9,17 @@
 #include "arduino-base/Libraries/AnalogInput.h"
 #include "arduino-base/Libraries/Button.h"
 #include "arduino-base/Libraries/Timer.h"
-//#include "arduino-base/Libraries/SerialManager.h"
+#include "arduino-base/Libraries/SerialManager.h"
 #include <genieArduino.h>
 
 #define analogInput1Pin A0
 #define resetLine 4
 #define button1Pin 2
 
-//SerialManager serialManager;
-//long baudRate = 9600;
+SerialManager serialManager;
+long baudRate = 115200;
 AnalogInput analogInput1;
+int traceValue;
 Button button1;
 Timer timer1;
 Genie genie;
@@ -27,14 +28,15 @@ int currentAnalogInput1Value = 0;
 int pulseCount = 0;
 bool newread = true;
 int val = 0;
-int timerDuration = 3000;
+int timerDuration = 5000;
 int peakValue = 0;
 int threshold = 50;
 
+
 void setup() {
   Serial.begin(9600);
-  //Serial1.begin(9600); //LCD display is on hardware serial "1"
-  genie.Begin(Serial);
+  Serial1.begin(9600); //LCD display is on hardware serial "1"
+  genie.Begin(Serial1);
   pinMode(resetLine, OUTPUT);  // Set D4 on Arduino to Output
   digitalWrite(resetLine, 0);  // Reset the Display via D4
   delay(100);
@@ -50,15 +52,15 @@ void setup() {
   boolean enableLowPass = false;
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
-    int traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //Map values for scope plot
-    genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); // Write the mapped values
+    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //Map values for scope plot
+    
   });
 
   //DIGITAL INPUTS
   button1.setup(button1Pin, [](int state) {
     if (!state) {
       if (timer1.isRunning() == false) {
-        //serialManager.sendJsonMessage("button-press", 1); //tell application to start listening to data
+        serialManager.sendJsonMessage("button-press", 1); //tell application to start listening to data
         pulseCount = 0;
         genie.WriteObject(GENIE_OBJ_FORM, 1, 1); // Get ready caption
         delay(1000);
@@ -78,7 +80,7 @@ void setup() {
   //TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      //serialManager.sendJsonMessage("pressure-reading", analogInputValue);
+      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
       if (currentAnalogInput1Value > 250 && newread == true) {
         newread = false;
         pulseCount++;
@@ -95,28 +97,28 @@ void setup() {
       }
       delay(2000);
       genie.WriteObject(GENIE_OBJ_FORM, 0, 1); //show live scope
-      //serialManager.sendJsonMessage("time-up", 1);
-      //serialManager.sendJsonMessage("material", pulseCount);
+      serialManager.sendJsonMessage("time-up", 1);
+      serialManager.sendJsonMessage("material", pulseCount);
     }
   }, timerDuration);
 }
 
 void loop() {
   analogInput1.idle();
+  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); // Write the mapped values
   button1.idle();
   timer1.idle();
 }
 
-/*
+
 void onParse(char* message, int value) {
-  if (strcmp(message, "pressure-reading") == 0 && value == 1) {
+ if (strcmp(message, "pressure-reading") == 0 && value == 1) {
     serialManager.sendJsonMessage(message, analogInput1.readValue());
-  }
-  else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
+ }
+  if (strcmp(message, "wake-arduino") == 0 && value == 1) {
     serialManager.sendJsonMessage("arduino-ready", 1);
   }
   else {
     serialManager.sendJsonMessage("unknown-command", 1);
   }
 }
-*/
