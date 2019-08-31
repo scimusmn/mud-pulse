@@ -10,7 +10,7 @@
 #include "arduino-base/Libraries/Button.h"
 #include "arduino-base/Libraries/Timer.h"
 #include "arduino-base/Libraries/SerialManager.h"
-#include <genieArduino.h>
+#include <genieArduino.h> //use library manager in the Arduino IDE to add this library
 
 #define analogInput1Pin A0
 #define resetLine 4
@@ -53,7 +53,7 @@ void setup() {
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //Map values for scope plot
-    
+
   });
 
   //DIGITAL INPUTS
@@ -90,6 +90,8 @@ void setup() {
       }
     }
     else if (ended == true) {
+      serialManager.sendJsonMessage("time-up", 1);
+      serialManager.sendJsonMessage("material", pulseCount);
       delay(1000);
       genie.WriteObject(GENIE_OBJ_FORM, 4, 1); //message sent to computer caption
       for (int i = 0; i < 75; i++) { //clear previous data
@@ -97,8 +99,7 @@ void setup() {
       }
       delay(2000);
       genie.WriteObject(GENIE_OBJ_FORM, 0, 1); //show live scope
-      serialManager.sendJsonMessage("time-up", 1);
-      serialManager.sendJsonMessage("material", pulseCount);
+
     }
   }, timerDuration);
 }
@@ -112,9 +113,9 @@ void loop() {
 
 
 void onParse(char* message, int value) {
- if (strcmp(message, "pressure-reading") == 0 && value == 1) {
+  if (strcmp(message, "pressure-reading") == 0 && value == 1) {
     serialManager.sendJsonMessage(message, analogInput1.readValue());
- }
+  }
   if (strcmp(message, "wake-arduino") == 0 && value == 1) {
     serialManager.sendJsonMessage("arduino-ready", 1);
   }
