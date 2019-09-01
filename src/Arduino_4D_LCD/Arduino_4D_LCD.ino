@@ -53,7 +53,6 @@ void setup() {
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //map values for scope plot
-
   });
 
   //DIGITAL INPUTS
@@ -99,7 +98,6 @@ void setup() {
       }
       delay(2000);
       genie.WriteObject(GENIE_OBJ_FORM, 0, 1); //show live scope
-
     }
   }, timerDuration);
 }
