@@ -83,6 +83,7 @@ class App extends Component {
       sendData(IPC.RESET_PORTS_COMMAND);
 
       console.log('restarting ipcCommunication...');
+
       restartIpcCommunication();
     }
 
@@ -101,7 +102,7 @@ class App extends Component {
     }
 
     return (
-      <Fragment className="text-center">
+      <Fragment>
         <Container fluid>
           <Row>
             <Banner backgroundColor="#666" />
