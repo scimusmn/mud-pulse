@@ -37,7 +37,7 @@ void setup() {
   boolean arduinoJsonDebug = false;
 
   // Ensure Serial Port is open and ready to communicate
-  serialManager.setup(baudRate, [](char* message, int value) {
+  serialManager.setup(115200, [](char* message, int value) {
     onParse(message, value);
   }, arduinoJsonDebug);
 
@@ -59,10 +59,6 @@ void setup() {
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //map values for scope plot
-
-    // if (running == true) {
-    //  serialManager.sendJsonMessage("pressure-reading", traceValue);
-    // }
   });
 
   //DIGITAL INPUTS
@@ -116,6 +112,7 @@ void loop() {
   analogInput1.idle();
   genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); //write the mapped values
   button1.idle();
+  serialManager.idle();
   timer1.idle();
 }
 
