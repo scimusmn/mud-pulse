@@ -5,17 +5,12 @@ import {
 } from 'reactstrap';
 import propTypes from 'prop-types';
 import Loading from '../Loading';
-import Banner from '../Banner';
 import DashboardWithSerialCommunication from '../Dashboard';
+import Flipbook from '../Flipbook';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
-import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
-//
-// const withSerialCommunication = require('../Arduino/arduino-base/ReactSerial/SerialHOC');
-
-console.log(withSerialCommunication);
 
 class App extends Component {
   constructor(props) {
@@ -109,50 +104,27 @@ class App extends Component {
       <Fragment>
         <Container fluid>
           <Row>
-            <Banner backgroundColor="#666" />
-          </Row>
-          <Row id="sampleRow">
-            <Col md={6}>
-              <Card>
-                <PeriodicGraphWithSerialCommunication
-                  label="Sampled Pulses"
-                  message="pressure-reading"
-                  type="line"
-                  yMax={1023}
-                />
-              </Card>
+            <Col md={7}>
+              <Flipbook />
             </Col>
-            <Col md={6}>
-              <Card>
-                <DashboardWithSerialCommunication />
-              </Card>
-            </Col>
-          </Row>
-          <Row>
-            <Col md={12}>
-              <div id="scopeContainer" className="mx-auto my-5 px-3 py-3">
-                <Container fluid>
-                  <Row>
-                    <h2 id="scopeName" className="px-3 py-1">MudPulse 2000XL</h2>
-                  </Row>
-                  <Row>
-                    <Col md={9} className="px-0">
-                      <div id="scopeGraph" className="py-3">
-                        <RealtimeGraphWithSerialCommunication
-                          borderColor="#FFFF00"
-                          gridColor="#444"
-                          message="pressure-reading"
-                          type="line"
-                          yMax={1023}
-                        />
-                      </div>
-                    </Col>
-                    <Col md={3}>
-                      <img className="mx-auto d-block" src="panel.png" alt="" />
-                    </Col>
-                  </Row>
-                </Container>
-              </div>
+            <Col md={5}>
+              <Row id="sampleRow">
+                <Col md={6}>
+                  <Card>
+                    <PeriodicGraphWithSerialCommunication
+                      label="Sampled Pulses"
+                      message="pressure-reading"
+                      type="line"
+                      yMax={1023}
+                    />
+                  </Card>
+                </Col>
+                <Col md={6}>
+                  <Card>
+                    <DashboardWithSerialCommunication />
+                  </Card>
+                </Col>
+              </Row>
             </Col>
           </Row>
         </Container>
