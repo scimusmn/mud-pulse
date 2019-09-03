@@ -12,6 +12,10 @@ import RealtimeGraphWithSerialCommunication from '../Graph/RealtimeGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
+//
+// const withSerialCommunication = require('../Arduino/arduino-base/ReactSerial/SerialHOC');
+
+console.log(withSerialCommunication);
 
 class App extends Component {
   constructor(props) {

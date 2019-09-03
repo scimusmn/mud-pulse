@@ -17,7 +17,7 @@
 #define button1Pin 2
 
 SerialManager serialManager;
-long baudRate = 115200;
+long baudRate = 9600;
 AnalogInput analogInput1;
 int traceValue;
 Button button1;
@@ -32,10 +32,16 @@ int timerDuration = 5000;
 int peakValue = 0;
 int threshold = 50;
 
-
 void setup() {
-  Serial.begin(9600);
-  Serial1.begin(9600); //LCD display is on hardware serial "1"
+  // Enables/disables debug messaging from ArduinoJson
+  boolean arduinoJsonDebug = false;
+
+  // Ensure Serial Port is open and ready to communicate
+  serialManager.setup(baudRate, [](char* message, int value) {
+    onParse(message, value);
+  }, arduinoJsonDebug);
+
+  Serial1.begin(baudRate); //LCD display is on hardware serial "1"
   genie.Begin(Serial1);
   pinMode(resetLine, OUTPUT);  // Set D4 on Arduino to Output
   digitalWrite(resetLine, 0);  // Reset the Display via D4
@@ -53,6 +59,10 @@ void setup() {
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100); //map values for scope plot
+
+    // if (running == true) {
+    //  serialManager.sendJsonMessage("pressure-reading", traceValue);
+    // }
   });
 
   //DIGITAL INPUTS
