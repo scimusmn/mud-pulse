@@ -102,14 +102,19 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Container fluid>
-          <Row>
-            <Col md={7}>
+        <Container fluid className="h-100">
+          <Row className="h-100">
+            <Col md={7} className="h-100 px-0">
               <Flipbook />
             </Col>
-            <Col md={5}>
+            <Col md={5} className="h-100">
               <Row id="sampleRow">
-                <Col md={6}>
+                <Col md={12}>
+                  <Card>
+                    <DashboardWithSerialCommunication />
+                  </Card>
+                </Col>
+                <Col md={12}>
                   <Card>
                     <PeriodicGraphWithSerialCommunication
                       label="Sampled Pulses"
@@ -117,11 +122,6 @@ class App extends Component {
                       type="line"
                       yMax={1023}
                     />
-                  </Card>
-                </Col>
-                <Col md={6}>
-                  <Card>
-                    <DashboardWithSerialCommunication />
                   </Card>
                 </Col>
               </Row>
