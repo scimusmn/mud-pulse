@@ -1,10 +1,11 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
 import {
-  Card, Col, Container, Row,
+  Card, CardTitle, Col, Container, Row,
 } from 'reactstrap';
 import propTypes from 'prop-types';
 import Loading from '../Loading';
+import Strata from '../Strata';
 import DashboardWithSerialCommunication from '../Dashboard';
 import Flipbook from '../Flipbook';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
@@ -70,7 +71,7 @@ class App extends Component {
   }
 
   refreshPorts() {
-    const { restartIpcCommunication, sendData } = this.props;
+    const { sendData, startIpcCommunication, stopIpcCommunication } = this.props;
     const { refreshPortCount } = this.state;
 
     if (refreshPortCount === 2) {
@@ -83,7 +84,8 @@ class App extends Component {
 
       console.log('restarting ipcCommunication...');
 
-      restartIpcCommunication();
+      stopIpcCommunication();
+      startIpcCommunication();
     }
 
     this.setState(prevState => ({
@@ -108,15 +110,22 @@ class App extends Component {
               <Flipbook />
             </Col>
             <Col md={5} className="h-100">
-              <Row id="sampleRow">
-                <Col md={12}>
-                  <Card>
+              <Row className="h-100 py-3">
+                <Col md={12} className="align-self-start">
+                  <Strata />
+                </Col>
+                <Col md={12} className="align-self-middle">
+                  <Card className="h-100">
                     <DashboardWithSerialCommunication />
                   </Card>
                 </Col>
-                <Col md={12}>
+                <Col md={12} className="align-self-end">
                   <Card>
+                    <CardTitle>
+                      <h2 className="mb-0 text-center"><u>Pulse Analysis</u></h2>
+                    </CardTitle>
                     <PeriodicGraphWithSerialCommunication
+                      className="mb-3"
                       label="Sampled Pulses"
                       message="pressure-reading"
                       type="line"
@@ -134,9 +143,10 @@ class App extends Component {
 }
 
 App.propTypes = {
-  restartIpcCommunication: propTypes.func.isRequired,
   sendData: propTypes.func.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
+  startIpcCommunication: propTypes.func.isRequired,
+  stopIpcCommunication: propTypes.func.isRequired,
 };
 
 const AppWithSerialCommunication = withSerialCommunication(App);
