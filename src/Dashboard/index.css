@@ -1,6 +1,7 @@
 #dashboard {
-  background: #012456;
-  background-color: #012456;
+  /* background: #012456;
+  background-color: #012456; */
+  background: rgb(9, 58, 93);
+  background-color: rgb(9, 58, 93);
   color: #FFF;
-  min-height: 300px;
 }
