@@ -49,9 +49,36 @@ class Flipbook extends Component {
   render() {
     const { strata } = this.state;
 
+    let strata1 = '';
+    let strata2 = '';
+    let strata3 = '';
+
+    switch (strata) {
+      case 'strata1':
+        strata2 = 'd-none';
+        strata3 = 'd-none';
+        break;
+      case 'strata2':
+        strata1 = 'd-none';
+        strata3 = 'd-none';
+        break;
+      case 'strata3':
+        strata1 = 'd-none';
+        strata2 = 'd-none';
+        break;
+      default:
+        strata2 = 'd-none';
+        strata3 = 'd-none';
+        break;
+    }
+
+    /* eslint prefer-template: 0 */
+
     return (
       <Fragment>
-        <div id="flipbook" className={strata} />
+        <div id="strata1" className={'flipbook ' + strata1} />
+        <div id="strata2" className={'flipbook ' + strata2} />
+        <div id="strata3" className={'flipbook ' + strata3} />
       </Fragment>
     );
   }
