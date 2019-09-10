@@ -20,14 +20,11 @@
 #define button1Pin 2
 
 // Stele communication
-SerialManager steleSerialManager;
+SerialManager serialManager;
 long steleBaudRate = 115200;
-int stelePort = 0;
 
 // Genie communication
-SerialManager genieSerialManager;
 long genieBaudRate = 9600;
-int geniePort = 1;
 
 AnalogInput analogInput1;
 int traceValue;
@@ -48,18 +45,12 @@ void setup() {
   boolean arduinoJsonDebug = false;
 
   // Ensure Serial Port is open and ready to communicate
-  steleSerialManager.setup(stelePort, steleBaudRate, [](char* message, int value) {
+  serialManager.setup(steleBaudRate, [](char* message, int value) {
     onParse(message, value);
   }, arduinoJsonDebug);
 
-  // LCD display is on hardware serial "1"
-  genieSerialManager.setup(geniePort, genieBaudRate, [](char* message, int value) {
-    onParse(message, value);
-  }, arduinoJsonDebug);
-
-  // Grab a pointer for the Genie's serialPort
-  HardwareSerial* genieSerialPort = genieSerialManager.getPort();
-  genie.Begin((Stream&)genieSerialPort);
+  // LCD display is on hardware Serial1
+  genie.Begin(genieBaudRate);
 
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
@@ -93,7 +84,7 @@ void setup() {
       if (timer1.isRunning() == false) {
 
         // Tell application to start listening to data
-        steleSerialManager.sendJsonMessage("button-press", 1);
+        serialManager.sendJsonMessage("button-press", 1);
         pulseCount = 0;
 
         // Get ready caption
@@ -124,7 +115,7 @@ void setup() {
   // TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      steleSerialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
+      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
       if (currentAnalogInput1Value > 250 && newread == true) {
         newread = false;
         pulseCount++;
@@ -134,8 +125,8 @@ void setup() {
       }
     }
     else if (ended == true) {
-      steleSerialManager.sendJsonMessage("time-up", 1);
-      steleSerialManager.sendJsonMessage("material", pulseCount);
+      serialManager.sendJsonMessage("time-up", 1);
+      serialManager.sendJsonMessage("material", pulseCount);
       delay(1000);
       genie.WriteObject(GENIE_OBJ_FORM, 4, 1); //message sent to computer caption
       for (int i = 0; i < 75; i++) { //clear previous data
@@ -154,19 +145,19 @@ void loop() {
   genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
   button1.idle();
-  steleSerialManager.idle();
+  serialManager.idle();
   timer1.idle();
 }
 
 
 void onParse(char* message, int value) {
   if (strcmp(message, "pressure-reading") == 0 && value == 1) {
-    steleSerialManager.sendJsonMessage(message, analogInput1.readValue());
+    serialManager.sendJsonMessage(message, analogInput1.readValue());
   }
   if (strcmp(message, "wake-arduino") == 0 && value == 1) {
-    steleSerialManager.sendJsonMessage("arduino-ready", 1);
+    serialManager.sendJsonMessage("arduino-ready", 1);
   }
   else {
-    steleSerialManager.sendJsonMessage("unknown-command", 1);
+    serialManager.sendJsonMessage("unknown-command", 1);
   }
 }
