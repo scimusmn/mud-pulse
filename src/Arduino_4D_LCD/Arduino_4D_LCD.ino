@@ -34,7 +34,7 @@ int threshold = 50;
 
 
 void setup() {
-  Serial.begin(9600);
+
   Serial1.begin(9600); //LCD display is on hardware serial "1"
   genie.Begin(Serial1);
   pinMode(resetLine, OUTPUT);  // Set D4 on Arduino to Output
@@ -107,6 +107,7 @@ void loop() {
   genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue); //write the mapped values
   button1.idle();
   timer1.idle();
+  serialManager.idle();
 }
 
 
