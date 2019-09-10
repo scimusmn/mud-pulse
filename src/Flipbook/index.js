@@ -7,6 +7,7 @@ class Flipbook extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      graphing: false,
       strata: 'strata1',
     };
 
@@ -44,14 +45,29 @@ class Flipbook extends Component {
         strata,
       });
     }
+
+    if (data.message === 'button-press') {
+      this.setState({
+        graphing: true,
+      });
+    }
+
+    // Ending sampling
+    if (data.message === 'time-up') {
+      this.setState({
+        graphing: false,
+      });
+    }
   }
 
   render() {
-    const { strata } = this.state;
+    const { graphing, strata } = this.state;
 
     let strata1 = '';
     let strata2 = '';
     let strata3 = '';
+
+    let fakeModalClass = 'd-none';
 
     switch (strata) {
       case 'strata1':
@@ -72,6 +88,13 @@ class Flipbook extends Component {
         break;
     }
 
+    if (graphing) {
+      strata1 += ' graphingBlur';
+      strata2 += ' graphingBlur';
+      strata3 += ' graphingBlur';
+      fakeModalClass = '';
+    }
+
     /* eslint prefer-template: 0 */
 
     return (
@@ -79,6 +102,9 @@ class Flipbook extends Component {
         <div id="strata1" className={'flipbook ' + strata1} />
         <div id="strata2" className={'flipbook ' + strata2} />
         <div id="strata3" className={'flipbook ' + strata3} />
+        <div id="fakeModal" className={fakeModalClass}>
+          Graphing
+        </div>
       </Fragment>
     );
   }

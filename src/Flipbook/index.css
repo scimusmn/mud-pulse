@@ -1,7 +1,9 @@
-.flipbook {
-  background-position: center;
-  background-size: 140%;
-  height: 100%;
+#fakeModal {
+  position: absolute;
+  width: 100%;
+  top: calc(50% - 1em);
+  text-align: center;
+  font-size: 10em;
 }
 
 #strata1 {
@@ -14,4 +16,14 @@
 
 #strata3 {
   background-image: url('/images/Illustration_GTS-04.jpg');
+}
+
+.flipbook {
+  background-position: center;
+  background-size: 140%;
+  height: 100%;
+}
+
+.graphingBlur {
+  filter: blur(3px);
 }
