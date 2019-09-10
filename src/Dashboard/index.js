@@ -1,17 +1,22 @@
 import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import './index.css';
-import { strata1, strata2, strata3 } from './messages';
+import {
+  pulseCountTwo, pulseCountThree, pulseCountFour, pulseCountFive, congrats,
+} from './messages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 
 class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      instruction: strata1(),
+      anticipatedStrata: 5,
+      instruction: pulseCountFive(),
+      rounds: 1,
       status: 'waiting',
     };
 
+    this.generateRandomStrata = this.generateRandomStrata.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
   }
 
@@ -23,30 +28,49 @@ class Dashboard extends Component {
 
   onSerialData(data) {
     if (data.message === 'material') {
-      let instruction = '';
-      switch (data.value) {
-        case 2:
-          instruction = strata2();
-          break;
-        case 3:
-          instruction = strata3();
-          break;
-        case 4:
-          instruction = strata3();
-          break;
-        case 5:
-          // ???
-          instruction = strata1();
-          break;
-        default:
-          // ???
-          instruction = strata1();
-          break;
-      }
+      const { anticipatedStrata, rounds } = this.state;
 
-      this.setState({
-        instruction,
-      });
+      if (data.value === anticipatedStrata) {
+        const randomStrata = this.generateRandomStrata();
+
+        let roundCount = 0;
+        if (rounds === 3) {
+          roundCount = 1;
+        } else {
+          roundCount = rounds + 1;
+        }
+
+        let instruction = '';
+        switch (randomStrata) {
+          case 2:
+            instruction = pulseCountTwo();
+            break;
+          case 3:
+            instruction = pulseCountThree();
+            break;
+          case 4:
+            instruction = pulseCountFour();
+            break;
+          case 5:
+            instruction = pulseCountFive();
+            break;
+          default:
+            instruction = pulseCountTwo();
+            break;
+        }
+
+        if (anticipatedStrata === 4) {
+          instruction = congrats();
+        }
+
+        this.setState({
+          anticipatedStrata: randomStrata,
+          instruction,
+          rounds: roundCount,
+        });
+      } else {
+        // TODO: Handle messaging for when user does wrong pulse count
+      }
     }
 
     if (data.message === 'button-press') {
@@ -61,6 +85,20 @@ class Dashboard extends Component {
         status: 'waiting',
       });
     }
+  }
+
+  generateRandomStrata() {
+    const { rounds } = this.state;
+
+    // Generates a random integer from 2 to 5
+    let randomStrata = Math.floor(Math.random() * 4) + 2;
+    if (randomStrata === 4 && rounds !== 3) {
+      randomStrata = 5;
+    } else if (rounds === 3) {
+      randomStrata = 4;
+    }
+
+    return randomStrata;
   }
 
   render() {
