@@ -96,6 +96,7 @@ class PeriodicGraph extends Component {
         yAxes: [
           {
             ticks: {
+              display: false,
               max: yMax,
               min: yMin,
               stepSize: 200,
