@@ -4,6 +4,7 @@ import {
   Card, CardTitle, Col, Container, Row,
 } from 'reactstrap';
 import propTypes from 'prop-types';
+import './index.css';
 import Loading from '../Loading';
 import Strata from '../Strata';
 import DashboardWithSerialCommunication from '../Dashboard';
@@ -111,10 +112,10 @@ class App extends Component {
             </Col>
             <Col md={5} className="h-100">
               <Row className="h-100 py-3">
-                <Col md={12} className="align-self-start">
+                <Col md={12} className="align-self-start h-30">
                   <Strata />
                 </Col>
-                <Col md={12} className="align-self-middle">
+                <Col md={12} className="align-self-middle h-30">
                   <Card className="h-100">
                     <DashboardWithSerialCommunication />
                   </Card>
@@ -122,7 +123,9 @@ class App extends Component {
                 <Col md={12} className="align-self-end">
                   <Card>
                     <CardTitle>
-                      <h2 className="mb-0 text-center"><u>Pulse Analysis</u></h2>
+                      <h2 className="mb-0 text-center national">
+                        <u>Pulse Analysis</u>
+                      </h2>
                     </CardTitle>
                     <PeriodicGraphWithSerialCommunication
                       className="mb-3"
