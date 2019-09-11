@@ -21,11 +21,6 @@ code {
     monospace;
 }
 
-#sampleRow,
-#sampleRow .card {
-  min-height: 300px;
-}
-
 .chart-container {
   height: 350px;
   width: 90%;
@@ -59,4 +54,9 @@ code {
 
 .chart-wrapper {
   height: 300px;
+}
+
+@font-face {
+  font-family: 'national';
+  src: url('/fonts/National-Black.otf');
 }
