@@ -34,7 +34,7 @@ class Dashboard extends Component {
         const randomStrata = this.generateRandomStrata();
 
         let roundCount = 0;
-        if (rounds === 3) {
+        if (rounds === 2) {
           roundCount = 1;
         } else {
           roundCount = rounds + 1;
@@ -94,7 +94,7 @@ class Dashboard extends Component {
     let randomStrata = Math.floor(Math.random() * 4) + 2;
     if (randomStrata === 4 && rounds !== 3) {
       randomStrata = 5;
-    } else if (rounds === 3) {
+    } else if (rounds === 2) {
       randomStrata = 4;
     }
 
