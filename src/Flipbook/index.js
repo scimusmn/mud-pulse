@@ -31,10 +31,10 @@ class Flipbook extends Component {
           strata = 'strata2';
           break;
         case 4:
-          strata = 'strata3';
+          strata = 'strata4';
           break;
         case 5:
-          strata = 'strata1';
+          strata = 'strata3';
           break;
         default:
           strata = 'strata1';
@@ -66,6 +66,7 @@ class Flipbook extends Component {
     let strata1 = '';
     let strata2 = '';
     let strata3 = '';
+    let strata4 = '';
 
     let fakeModalClass = 'd-none';
 
@@ -73,18 +74,27 @@ class Flipbook extends Component {
       case 'strata1':
         strata2 = 'd-none';
         strata3 = 'd-none';
+        strata4 = 'd-none';
         break;
       case 'strata2':
         strata1 = 'd-none';
         strata3 = 'd-none';
+        strata4 = 'd-none';
         break;
       case 'strata3':
         strata1 = 'd-none';
         strata2 = 'd-none';
+        strata4 = 'd-none';
+        break;
+      case 'strata4':
+        strata1 = 'd-none';
+        strata2 = 'd-none';
+        strata3 = 'd-none';
         break;
       default:
         strata2 = 'd-none';
         strata3 = 'd-none';
+        strata4 = 'd-none';
         break;
     }
 
@@ -92,6 +102,7 @@ class Flipbook extends Component {
       strata1 += ' graphingBlur';
       strata2 += ' graphingBlur';
       strata3 += ' graphingBlur';
+      strata4 += ' graphingBlur';
       fakeModalClass = '';
     }
 
@@ -102,8 +113,9 @@ class Flipbook extends Component {
         <div id="strata1" className={'flipbook ' + strata1} />
         <div id="strata2" className={'flipbook ' + strata2} />
         <div id="strata3" className={'flipbook ' + strata3} />
+        <div id="strata4" className={'flipbook ' + strata4} />
         <div id="fakeModal" className={fakeModalClass}>
-          Graphing
+          Graphing...
         </div>
       </Fragment>
     );
