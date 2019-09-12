@@ -50,7 +50,8 @@ void setup() {
   }, arduinoJsonDebug);
 
   // LCD display is on hardware Serial1
-  genie.Begin(genieBaudRate);
+  Serial1.begin(genieBaudRate);
+  genie.Begin(Serial1);
 
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
@@ -88,24 +89,24 @@ void setup() {
         pulseCount = 0;
 
         // Get ready caption
-        genie.WriteObject(GENIE_OBJ_FORM, 1, 1);
-        delay(1000);
+        //genie.WriteObject(GENIE_OBJ_FORM, 1, 1);
+        //delay(1000);
 
         // Get set...caption
-        genie.WriteObject(GENIE_OBJ_FORM, 2, 1);
-        delay(1000);
+        //genie.WriteObject(GENIE_OBJ_FORM, 2, 1);
+        //delay(1000);
 
         // Go! caption
-        genie.WriteObject(GENIE_OBJ_FORM, 3, 1);
-        delay(500);
+        //genie.WriteObject(GENIE_OBJ_FORM, 3, 1);
+        //delay(500);
 
         // Clear previous data and write zeros width of scope display
-        for (int i = 0; i < 75; i++) {
-          genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0);
-        }
+        //for (int i = 0; i < 75; i++) {
+        //  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0);
+        //}
 
         // Show live scope
-        genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
+        //genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
 
         timer1.start();
       }
@@ -127,13 +128,19 @@ void setup() {
     else if (ended == true) {
       serialManager.sendJsonMessage("time-up", 1);
       serialManager.sendJsonMessage("material", pulseCount);
-      delay(1000);
-      genie.WriteObject(GENIE_OBJ_FORM, 4, 1); //message sent to computer caption
-      for (int i = 0; i < 75; i++) { //clear previous data
-        genie.WriteObject(GENIE_OBJ_SCOPE, 0, 0); //write zeros width of scope display
-      }
-      delay(2000);
-      genie.WriteObject(GENIE_OBJ_FORM, 0, 1); //show live scope
+      // delay(1000);
+
+      //message sent to computer caption
+      // genie.WriteObject(GENIE_OBJ_FORM, 4, 1);
+
+      //clear previous data and write zeros width of scope display
+      // for (int i = 0; i < 75; i++) {
+      //  genie.WriteObject(GENIE_OBJ_SCOPE, 0, 0);
+      //}
+      // delay(2000);
+
+      // show live scope
+      // genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
     }
   }, timerDuration);
 }
