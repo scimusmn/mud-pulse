@@ -7,7 +7,7 @@ import propTypes from 'prop-types';
 import './index.css';
 import Loading from '../Loading';
 import Strata from '../Strata';
-import DashboardWithSerialCommunication from '../Dashboard';
+import Dashboard from '../Dashboard';
 import Flipbook from '../Flipbook';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
@@ -18,9 +18,13 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      anticipatedStrata: [5, 3, 4],
+      graphing: false,
       handshake: false,
       refreshPortCount: 0,
       pingArduinoStatus: false,
+      resetMessage: false,
+      round: 0,
     };
 
     this.onSerialData = this.onSerialData.bind(this);
@@ -48,6 +52,38 @@ class App extends Component {
       this.setState({
         pingArduinoStatus: false,
         refreshPortCount: 0,
+      });
+    }
+
+    if (data.message === 'material') {
+      const { anticipatedStrata, round } = this.state;
+
+      if (data.value === anticipatedStrata[round]) {
+        if (round === 2) {
+          this.setState({
+            resetMessage: true,
+            round: 0,
+          });
+        } else {
+          this.setState({
+            resetMessage: false,
+            round: round + 1,
+          });
+        }
+      }
+    }
+
+    // Handle end of graphing
+    if (data.message === 'button-press') {
+      this.setState({
+        graphing: true,
+      });
+    }
+
+    // Ending sampling
+    if (data.message === 'time-up') {
+      this.setState({
+        graphing: false,
       });
     }
   }
@@ -95,7 +131,9 @@ class App extends Component {
   }
 
   render() {
-    const { handshake } = this.state;
+    const {
+      anticipatedStrata, graphing, handshake, resetMessage, round,
+    } = this.state;
 
     if (!handshake) {
       return (
@@ -103,12 +141,24 @@ class App extends Component {
       );
     }
 
+    if (resetMessage) {
+      setTimeout(() => {
+        this.setState({
+          resetMessage: false,
+        });
+      }, 10000);
+    }
+
     return (
       <Fragment>
         <Container fluid className="h-100">
           <Row className="h-100">
             <Col md={7} className="h-100 px-0">
-              <Flipbook />
+              <Flipbook
+                graphing={graphing}
+                resetMessage={resetMessage}
+                round={round}
+              />
             </Col>
             <Col md={5} className="h-100">
               <Row className="h-100 py-3">
@@ -117,7 +167,11 @@ class App extends Component {
                 </Col>
                 <Col md={12} className="align-self-middle h-30">
                   <Card className="h-100">
-                    <DashboardWithSerialCommunication />
+                    <Dashboard
+                      resetMessage={resetMessage}
+                      round={round}
+                      strata={anticipatedStrata[round]}
+                    />
                   </Card>
                 </Col>
                 <Col md={12} className="align-self-end">

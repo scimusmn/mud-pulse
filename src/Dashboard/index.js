@@ -2,89 +2,20 @@ import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import './index.css';
 import {
-  pulseCountTwo, pulseCountThree, pulseCountFour, pulseCountFive, congrats,
+  pulseCount, congrats,
 } from './messages';
-import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 
 class Dashboard extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      anticipatedStrata: 5,
-      instruction: pulseCountFive(),
-      rounds: 1,
-      status: 'waiting',
     };
 
-    this.generateRandomStrata = this.generateRandomStrata.bind(this);
-    this.onSerialData = this.onSerialData.bind(this);
+    // this.generateRandomStrata = this.generateRandomStrata.bind(this);
   }
 
   componentDidMount() {
-    const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
-  }
-
-  onSerialData(data) {
-    if (data.message === 'material') {
-      const { anticipatedStrata, rounds } = this.state;
-
-      if (data.value === anticipatedStrata) {
-        const randomStrata = this.generateRandomStrata();
-
-        let roundCount = 0;
-        if (rounds === 2) {
-          roundCount = 1;
-        } else {
-          roundCount = rounds + 1;
-        }
-
-        let instruction = '';
-        switch (randomStrata) {
-          case 2:
-            instruction = pulseCountTwo();
-            break;
-          case 3:
-            instruction = pulseCountThree();
-            break;
-          case 4:
-            instruction = pulseCountFour();
-            break;
-          case 5:
-            instruction = pulseCountFive();
-            break;
-          default:
-            instruction = pulseCountTwo();
-            break;
-        }
-
-        if (anticipatedStrata === 4) {
-          instruction = congrats();
-        }
-
-        this.setState({
-          anticipatedStrata: randomStrata,
-          instruction,
-          rounds: roundCount,
-        });
-      } else {
-        // TODO: Handle messaging for when user does wrong pulse count
-      }
-    }
-
-    if (data.message === 'button-press') {
-      this.setState({
-        status: 'graphing',
-      });
-    }
-
-    // Ending sampling
-    if (data.message === 'time-up') {
-      this.setState({
-        status: 'waiting',
-      });
-    }
   }
 
   generateRandomStrata() {
@@ -102,34 +33,30 @@ class Dashboard extends Component {
   }
 
   render() {
-    /* eslint arrow-body-style: 0 */
-    const instructionText = () => {
-      const { instruction } = this.state;
-      return instruction;
-    };
+    const getCopy = () => {
+      const { resetMessage, round, strata } = this.props;
 
-    const dashboardStatus = () => {
-      /* eslint prefer-const: 0 */
-      const { status } = this.state;
-      let statusMessage = '';
-
-      switch (status) {
-        case 'graphing':
-          statusMessage = 'Graphing...';
+      let descriptor = '';
+      switch (round) {
+        case 0:
+          descriptor = 'first';
           break;
-        case 'waiting':
-          statusMessage = 'Click the button to begin detection.';
+        case 1:
+          descriptor = 'second';
+          break;
+        case 2:
+          descriptor = 'third';
           break;
         default:
           break;
       }
 
-      return (
-        statusMessage
-      );
-    };
+      if (resetMessage) {
+        return congrats();
+      }
 
-    console.log(dashboardStatus());
+      return pulseCount(strata, descriptor);
+    };
 
     return (
       <Fragment>
@@ -139,7 +66,7 @@ class Dashboard extends Component {
             <u>Objective</u>
             <span role="img" aria-label="exclamation">❗</span>
           </h2>
-          {instructionText()}
+          {getCopy()}
         </div>
       </Fragment>
     );
@@ -147,8 +74,9 @@ class Dashboard extends Component {
 }
 
 Dashboard.propTypes = {
-  setOnDataCallback: propTypes.func.isRequired,
+  resetMessage: propTypes.bool.isRequired,
+  round: propTypes.number.isRequired,
+  strata: propTypes.number.isRequired,
 };
 
-const DashboardWithSerialCommunication = withSerialCommunication(Dashboard);
-export default DashboardWithSerialCommunication;
+export default Dashboard;

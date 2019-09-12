@@ -1,67 +1,20 @@
 import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
-import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 import './index.css';
 
 class Flipbook extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      graphing: false,
-      strata: 'strata1',
     };
-
-    this.onSerialData = this.onSerialData.bind(this);
   }
 
   componentDidMount() {
-    const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
   }
 
-  onSerialData(data) {
-    if (data.message === 'material') {
-      let strata = '';
-      switch (data.value) {
-        case 2:
-          strata = 'strata1';
-          break;
-        case 3:
-          strata = 'strata2';
-          break;
-        case 4:
-          strata = 'strata4';
-          break;
-        case 5:
-          strata = 'strata3';
-          break;
-        default:
-          strata = 'strata1';
-          break;
-      }
-
-      this.setState({
-        strata,
-      });
-    }
-
-    if (data.message === 'button-press') {
-      this.setState({
-        graphing: true,
-      });
-    }
-
-    // Ending sampling
-    if (data.message === 'time-up') {
-      this.setState({
-        graphing: false,
-      });
-    }
-  }
-
   render() {
-    const { graphing, strata } = this.state;
+    const { graphing, resetMessage, round } = this.props;
 
     let strata1 = '';
     let strata2 = '';
@@ -70,32 +23,34 @@ class Flipbook extends Component {
 
     let fakeModalClass = 'd-none';
 
-    switch (strata) {
-      case 'strata1':
+    switch (round) {
+      case 0:
         strata2 = 'd-none';
         strata3 = 'd-none';
         strata4 = 'd-none';
         break;
-      case 'strata2':
+      case 1:
         strata1 = 'd-none';
         strata3 = 'd-none';
         strata4 = 'd-none';
         break;
-      case 'strata3':
+      case 2:
         strata1 = 'd-none';
         strata2 = 'd-none';
         strata4 = 'd-none';
-        break;
-      case 'strata4':
-        strata1 = 'd-none';
-        strata2 = 'd-none';
-        strata3 = 'd-none';
         break;
       default:
         strata2 = 'd-none';
         strata3 = 'd-none';
         strata4 = 'd-none';
         break;
+    }
+
+    if (resetMessage) {
+      strata1 = 'd-none';
+      strata2 = 'd-none';
+      strata3 = 'd-none';
+      strata4 = '';
     }
 
     if (graphing) {
@@ -123,8 +78,9 @@ class Flipbook extends Component {
 }
 
 Flipbook.propTypes = {
-  setOnDataCallback: propTypes.func.isRequired,
+  graphing: propTypes.bool.isRequired,
+  resetMessage: propTypes.bool.isRequired,
+  round: propTypes.number.isRequired,
 };
 
-const FlipbookWithSerialCommunication = withSerialCommunication(Flipbook);
-export default FlipbookWithSerialCommunication;
+export default Flipbook;
