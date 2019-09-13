@@ -176,10 +176,11 @@ class App extends Component {
 
     if (resetMessage) {
       setTimeout(() => {
-        this.setState({
-          resetMessage: false,
-          strataName: 'Unknown',
-        });
+        // this.setState({
+        //   resetMessage: false,
+        //   strataName: 'Unknown',
+        // });
+        window.location.reload();
       }, 10000);
     }
 
