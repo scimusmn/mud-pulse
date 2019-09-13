@@ -35,28 +35,31 @@ class PeriodicGraph extends Component {
   }
 
   onSerialData(data) {
+    const { resetMessage } = this.props;
     const { message } = this.state;
 
-    if (data.message === 'button-press') {
-      this.resetGraph();
-      this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
-    }
+    if (!resetMessage) {
+      if (data.message === 'button-press') {
+        this.resetGraph();
+        this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
+      }
 
-    // Ending sampling
-    if (data.message === 'time-up') {
-      this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
-    }
+      // Ending sampling
+      if (data.message === 'time-up') {
+        this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
+      }
 
-    if (data.message === message
-      && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
-      this.chartReference.chartInstance.config.data.datasets[0].data.push({
-        x: Date.now(),
-        y: data.value,
-      });
+      if (data.message === message
+        && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
+        this.chartReference.chartInstance.config.data.datasets[0].data.push({
+          x: Date.now(),
+          y: data.value,
+        });
 
-      this.chartReference.chartInstance.update({
-        preservation: true,
-      });
+        this.chartReference.chartInstance.update({
+          preservation: true,
+        });
+      }
     }
   }
 
@@ -156,6 +159,7 @@ PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
   message: propTypes.string.isRequired,
+  resetMessage: propTypes.bool.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,
