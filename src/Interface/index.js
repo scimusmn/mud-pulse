@@ -21,10 +21,12 @@ class App extends Component {
       anticipatedStrata: [5, 3, 4],
       graphing: false,
       handshake: false,
+      invalidPulse: false,
       refreshPortCount: 0,
       pingArduinoStatus: false,
       resetMessage: false,
       round: 0,
+      strataName: 'Unknown',
     };
 
     this.onSerialData = this.onSerialData.bind(this);
@@ -40,7 +42,7 @@ class App extends Component {
   }
 
   onSerialData(data) {
-    const { handshake } = this.state;
+    const { handshake, resetMessage } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
       if (!handshake) {
@@ -55,36 +57,67 @@ class App extends Component {
       });
     }
 
-    if (data.message === 'material') {
-      const { anticipatedStrata, round } = this.state;
+    if (!resetMessage) {
+      if (data.message === 'material') {
+        const { anticipatedStrata, round } = this.state;
 
-      if (data.value === anticipatedStrata[round]) {
-        if (round === 2) {
+        if (data.value === anticipatedStrata[round]) {
+          let strataName = '';
+          switch (anticipatedStrata[round]) {
+            case 2:
+              strataName = 'Limestone';
+              break;
+            case 3:
+              strataName = 'Dolomite';
+              break;
+            case 4:
+              strataName = 'Shale';
+              break;
+            case 5:
+              strataName = 'Sandstone';
+              break;
+            default:
+              strataName = 'Unknown';
+              break;
+          }
+
           this.setState({
-            resetMessage: true,
-            round: 0,
+            strataName,
           });
+
+          if (round === 2) {
+            this.setState({
+              invalidPulse: false,
+              resetMessage: true,
+              round: 0,
+            });
+          } else {
+            this.setState({
+              invalidPulse: false,
+              resetMessage: false,
+              round: round + 1,
+            });
+          }
         } else {
           this.setState({
-            resetMessage: false,
-            round: round + 1,
+            invalidPulse: true,
           });
         }
       }
-    }
 
-    // Handle end of graphing
-    if (data.message === 'button-press') {
-      this.setState({
-        graphing: true,
-      });
-    }
+      // Handle end of graphing
+      if (data.message === 'button-press') {
+        this.setState({
+          graphing: true,
+        });
+      }
 
-    // Ending sampling
-    if (data.message === 'time-up') {
-      this.setState({
-        graphing: false,
-      });
+      // Ending sampling
+      if (data.message === 'time-up') {
+        this.setState({
+          graphing: false,
+        });
+      }
     }
   }
 
@@ -132,7 +165,7 @@ class App extends Component {
 
   render() {
     const {
-      anticipatedStrata, graphing, handshake, resetMessage, round,
+      anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, round, strataName,
     } = this.state;
 
     if (!handshake) {
@@ -145,6 +178,7 @@ class App extends Component {
       setTimeout(() => {
         this.setState({
           resetMessage: false,
+          strataName: 'Unknown',
         });
       }, 10000);
     }
@@ -162,17 +196,20 @@ class App extends Component {
             </Col>
             <Col md={5} className="h-100">
               <Row className="h-100 py-3">
-                <Col md={12} className="align-self-start h-30">
-                  <Strata />
-                </Col>
                 <Col md={12} className="align-self-middle h-30">
                   <Card className="h-100">
                     <Dashboard
+                      invalidPulse={invalidPulse}
                       resetMessage={resetMessage}
                       round={round}
                       strata={anticipatedStrata[round]}
                     />
                   </Card>
+                </Col>
+                <Col md={12} className="align-self-start h-30">
+                  <Strata
+                    strata={strataName}
+                  />
                 </Col>
                 <Col md={12} className="align-self-end">
                   <Card>
@@ -185,6 +222,7 @@ class App extends Component {
                       className="mb-3"
                       label="Sampled Pulses"
                       message="pressure-reading"
+                      resetMessage={resetMessage}
                       type="line"
                       yMax={1023}
                     />

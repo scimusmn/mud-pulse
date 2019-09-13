@@ -2,7 +2,7 @@ import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import './index.css';
 import {
-  pulseCount, congrats,
+  congratsMsg, introMsg, invalidMsg, pulseCountMsg,
 } from './messages';
 
 class Dashboard extends Component {
@@ -34,38 +34,32 @@ class Dashboard extends Component {
 
   render() {
     const getCopy = () => {
-      const { resetMessage, round, strata } = this.props;
+      const {
+        invalidPulse, resetMessage, round, strata,
+      } = this.props;
 
-      let descriptor = '';
-      switch (round) {
-        case 0:
-          descriptor = 'first';
-          break;
-        case 1:
-          descriptor = 'second';
-          break;
-        case 2:
-          descriptor = 'third';
-          break;
-        default:
-          break;
-      }
+      const message = [];
 
       if (resetMessage) {
-        return congrats();
+        message.push(congratsMsg());
+      } else {
+        if (round === 0 || invalidPulse) {
+          if (!invalidPulse) {
+            message.push(introMsg());
+          } else {
+            message.push(invalidMsg());
+          }
+        }
+
+        message.push(pulseCountMsg(strata));
       }
 
-      return pulseCount(strata, descriptor);
+      return message;
     };
 
     return (
       <Fragment>
-        <div id="dashboard" className="h-100 px-2">
-          <h2 className="text-center">
-            <span role="img" aria-label="exclamation">❗</span>
-            <u>Objective</u>
-            <span role="img" aria-label="exclamation">❗</span>
-          </h2>
+        <div id="dashboard" className="h-100 px-2 text-center">
           {getCopy()}
         </div>
       </Fragment>
@@ -74,6 +68,7 @@ class Dashboard extends Component {
 }
 
 Dashboard.propTypes = {
+  invalidPulse: propTypes.bool.isRequired,
   resetMessage: propTypes.bool.isRequired,
   round: propTypes.number.isRequired,
   strata: propTypes.number.isRequired,

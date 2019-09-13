@@ -1,21 +1,36 @@
 import React, { Fragment } from 'react';
 
 /* eslint react/jsx-one-expression-per-line: 0 */
-export const pulseCount = (pulseMsgCount, pulseMsgDescriptor) => (
 
+export const congratsMsg = () => (
   <Fragment>
-    <h4 className="mb-5">
-      You have reached the {pulseMsgDescriptor} strata.
-    </h4>
-    <h4 className="mb-5">
-      Press the start button and squeeze the tube {pulseMsgCount} times to send your message.
-    </h4>
-    {/* <h4>Watch the message screen to see which strata you’ve reached.</h4> */}
+    <p className="mb-3">
+      Congratulations, you’ve reached the shale strata! Now the oil can be extracted.
+    </p>
   </Fragment>
 );
 
-export const congrats = () => (
+export const introMsg = () => (
   <Fragment>
-    <h4 className="mb-5">Congratulations, you’ve reached the shale strata! Now the oil can be extracted.</h4>
+    <p className="mb-3">
+      You are a drill on a mission to get oil. Operators have requested data on your location.
+    </p>
+  </Fragment>
+);
+
+export const invalidMsg = () => (
+  <Fragment>
+    <p className="mb-3">
+      The operators have received a corrupted data transmission. Please try again.
+    </p>
+  </Fragment>
+);
+
+export const pulseCountMsg = pulseMsgCount => (
+  <Fragment>
+    <p>
+      Press the start button and squeeze the tube {pulseMsgCount} times to send your message.
+      Watch the message screen to see which strata you’ve reached.
+    </p>
   </Fragment>
 );

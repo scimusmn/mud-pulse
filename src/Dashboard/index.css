@@ -1,9 +1,8 @@
 #dashboard {
-  /* background: #012456;
-  background-color: #012456; */
   background: rgb(9, 58, 93);
   background-color: rgb(9, 58, 93);
   color: #FFF;
-  font-family: 'national';
+  font-family: 'national-bold';
   height: 100%;
+  font-size: 2em;
 }
