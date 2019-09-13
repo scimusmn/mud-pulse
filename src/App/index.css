@@ -58,5 +58,10 @@ code {
 
 @font-face {
   font-family: 'national';
+  src: url('/fonts/National-Regular.otf');
+}
+
+@font-face {
+  font-family: 'national-bold';
   src: url('/fonts/National-Black.otf');
 }
