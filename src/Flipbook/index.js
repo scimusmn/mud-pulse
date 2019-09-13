@@ -70,7 +70,7 @@ class Flipbook extends Component {
         <div id="strata3" className={'flipbook ' + strata3} />
         <div id="strata4" className={'flipbook ' + strata4} />
         <div id="fakeModal" className={fakeModalClass}>
-          Graphing...
+          Transmitting message...
         </div>
       </Fragment>
     );
