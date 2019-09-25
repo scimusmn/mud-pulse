@@ -117,11 +117,11 @@ void setup() {
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
       serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
-      if (currentAnalogInput1Value > 250 && newread == true) {
+      if (currentAnalogInput1Value > 220 && newread == true) {
         newread = false;
         pulseCount++;
       }
-      if (currentAnalogInput1Value < 200) {
+      if (currentAnalogInput1Value < 190) {
         newread = true;
       }
     }
