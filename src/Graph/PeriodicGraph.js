@@ -12,6 +12,7 @@ class PeriodicGraph extends Component {
     this.state = {
       backgroundColor: props.backgroundColor,
       borderColor: props.borderColor,
+      gridColor: props.gridColor,
       message: props.message,
       type: props.type,
       yMax: props.yMax,
@@ -64,7 +65,7 @@ class PeriodicGraph extends Component {
   }
 
   getChartOptions() {
-    const { yMax, yMin } = this.state;
+    const { gridColor, yMax, yMin } = this.state;
     const chartOptions = {
       animation: {
         duration: 0,
@@ -90,6 +91,9 @@ class PeriodicGraph extends Component {
       scales: {
         xAxes: [
           {
+            gridLines: {
+              color: gridColor,
+            },
             ticks: {
               display: false,
             },
@@ -98,6 +102,9 @@ class PeriodicGraph extends Component {
         ],
         yAxes: [
           {
+            gridLines: {
+              color: gridColor,
+            },
             ticks: {
               display: false,
               max: yMax,
@@ -158,6 +165,7 @@ class PeriodicGraph extends Component {
 PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
+  gridColor: propTypes.string,
   message: propTypes.string.isRequired,
   resetMessage: propTypes.bool.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
@@ -169,6 +177,7 @@ PeriodicGraph.propTypes = {
 PeriodicGraph.defaultProps = {
   backgroundColor: 'rgb(255, 99, 132)',
   borderColor: 'rgb(255, 99, 132)',
+  gridColor: 'rgb(0, 0, 0)',
   type: 'bar',
   yMax: 1,
   yMin: 0,
