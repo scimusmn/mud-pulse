@@ -19,6 +19,9 @@
 #define resetLine 4
 #define button1Pin 2
 
+// Mud Pulse state management since we're using the button to do multiple things
+int allowGraphing = 0;
+
 // Stele communication
 SerialManager serialManager;
 long steleBaudRate = 115200;
@@ -50,8 +53,8 @@ void setup() {
   }, arduinoJsonDebug);
 
   // LCD display is on hardware Serial1
-  Serial1.begin(genieBaudRate);
-  genie.Begin(Serial1);
+  // Serial1.begin(genieBaudRate);
+  // genie.Begin(Serial1);
 
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
@@ -82,33 +85,38 @@ void setup() {
   // DIGITAL INPUTS
   button1.setup(button1Pin, [](int state) {
     if (!state) {
-      if (timer1.isRunning() == false) {
+      if (allowGraphing == 1) {
+        if (timer1.isRunning() == false) {
 
-        // Tell application to start listening to data
+          // Tell application to start listening to data
+          serialManager.sendJsonMessage("button-press", 1);
+          pulseCount = 0;
+
+          // Get ready caption
+          //genie.WriteObject(GENIE_OBJ_FORM, 1, 1);
+          //delay(1000);
+
+          // Get set...caption
+          //genie.WriteObject(GENIE_OBJ_FORM, 2, 1);
+          //delay(1000);
+
+          // Go! caption
+          //genie.WriteObject(GENIE_OBJ_FORM, 3, 1);
+          //delay(500);
+
+          // Clear previous data and write zeros width of scope display
+          //for (int i = 0; i < 75; i++) {
+          //  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0);
+          //}
+
+          // Show live scope
+          //genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
+
+          timer1.start();
+        }
+      }
+      else {
         serialManager.sendJsonMessage("button-press", 1);
-        pulseCount = 0;
-
-        // Get ready caption
-        //genie.WriteObject(GENIE_OBJ_FORM, 1, 1);
-        //delay(1000);
-
-        // Get set...caption
-        //genie.WriteObject(GENIE_OBJ_FORM, 2, 1);
-        //delay(1000);
-
-        // Go! caption
-        //genie.WriteObject(GENIE_OBJ_FORM, 3, 1);
-        //delay(500);
-
-        // Clear previous data and write zeros width of scope display
-        //for (int i = 0; i < 75; i++) {
-        //  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0);
-        //}
-
-        // Show live scope
-        //genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
-
-        timer1.start();
       }
     }
   });
@@ -149,7 +157,7 @@ void loop() {
   analogInput1.idle();
 
   // Write the mapped values
-  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
+  // genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
   button1.idle();
   serialManager.idle();
@@ -158,10 +166,14 @@ void loop() {
 
 
 void onParse(char* message, int value) {
-  if (strcmp(message, "pressure-reading") == 0 && value == 1) {
+  if (strcmp(message, "allow-graphing") == 0) {
+    allowGraphing = value;
+    serialManager.sendJsonMessage("allow-graphing", allowGraphing);
+  }
+  else if (strcmp(message, "pressure-reading") == 0 && value == 1) {
     serialManager.sendJsonMessage(message, analogInput1.readValue());
   }
-  if (strcmp(message, "wake-arduino") == 0 && value == 1) {
+  else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
     serialManager.sendJsonMessage("arduino-ready", 1);
   }
   else {

@@ -40,15 +40,12 @@ class PeriodicGraph extends Component {
     const { message } = this.state;
 
     if (!resetMessage) {
-      if (data.message === 'button-press') {
-        this.resetGraph();
-        this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
-      }
-
-      // Ending sampling
-      if (data.message === 'time-up') {
-        this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
-      }
+      // if (data.message === 'button-press' && graphing) {
+      //   this.resetGraph();
+      //   this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
+      // } else if (data.message === 'time-up') {
+      //   this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
+      // } else
 
       if (data.message === message
         && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
@@ -83,7 +80,7 @@ class PeriodicGraph extends Component {
           delay: 0,
           duration: 5000,
           frameRate: 20,
-          pause: true,
+          pause: false,
           refresh: 100,
           ttl: 5000,
         },
@@ -127,11 +124,10 @@ class PeriodicGraph extends Component {
 
   render() {
     /* eslint no-return-assign: 0 */
-    const {
-      backgroundColor,
-      borderColor,
-      type,
-    } = this.state;
+    const { backgroundColor, borderColor, type } = this.state;
+
+    const graphClass = 'chart-wrapper';
+    // (graphing) ? 'chart-wrapper' : 'chart-wrapper';
 
     const graphData = {
       datasets: [{
@@ -144,12 +140,13 @@ class PeriodicGraph extends Component {
       }],
     };
 
+
     /* eslint arrow-parens: 0 */
     /* eslint no-return-assign: 0 */
 
     return (
       <Fragment>
-        <div className="chart-wrapper">
+        <div className={graphClass}>
           <ChartComponent
             data={graphData}
             options={this.getChartOptions()}
@@ -165,6 +162,7 @@ class PeriodicGraph extends Component {
 PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
+  // graphing: propTypes.bool.isRequired,
   gridColor: propTypes.string,
   message: propTypes.string.isRequired,
   resetMessage: propTypes.bool.isRequired,
