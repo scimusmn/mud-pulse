@@ -31,8 +31,6 @@ class App extends Component {
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
-
-    this.sendData = props.sendData;
   }
 
   componentDidMount() {
@@ -43,6 +41,7 @@ class App extends Component {
   }
 
   onSerialData(data) {
+    const { sendData } = this.props;
     const {
       anticipatedStrata, graphing, handshake, resetMessage, round, step,
     } = this.state;
@@ -112,7 +111,7 @@ class App extends Component {
           });
         } else {
           if (step === 4) {
-            this.sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+            sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
           }
 
           this.setState(prevState => ({
@@ -123,7 +122,7 @@ class App extends Component {
 
       // Ending sampling
       if (data.message === 'time-up') {
-        this.sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
+        sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
         this.setState(prevState => ({
           graphing: false,
           step: prevState.step,
@@ -267,6 +266,7 @@ class App extends Component {
         <Container>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
           <PeriodicGraphWithSerialCommunication
+            graphing={graphing}
             gridColor="rgb(255, 255, 255)"
             label="Sampled Pulses"
             message="pressure-reading"
