@@ -27,11 +27,11 @@ code {
 }
 
 .chart-wrapper {
-  /*bottom: 13%;*/
+  bottom: 13%;
   height: 300px;
-  /*left: 50%;
+  left: 50%;
   position: absolute;
-  transform: translateX(-50%);*/
+  transform: translateX(-50%);
   width: 74%;
 }
 
