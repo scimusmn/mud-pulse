@@ -13,7 +13,7 @@
 #include "arduino-base/Libraries/SerialManager.h"
 
 // Use library manager in the Arduino IDE to add this library
-#include <genieArduino.h>
+// #include <genieArduino.h>
 
 #define analogInput1Pin A0
 #define resetLine 4
@@ -32,7 +32,7 @@ long genieBaudRate = 9600;
 AnalogInput analogInput1;
 int traceValue;
 Button button1;
-Genie genie;
+// Genie genie;
 Timer timer1;
 
 int currentAnalogInput1Value = 0;
@@ -71,12 +71,18 @@ void setup() {
   // We need to do averaging or we'll crash the app
   boolean enableAverager = true;
   // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 5;
+  int samplingRate = 200;
   // We don't want use LowPass because that will make the graph not as responsive
   boolean enableLowPass = false;
-  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
 
+  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
+
+    serialManager.sendJsonMessage("polling", allowGraphing);
+
+    if (allowGraphing == 1 && timer1.isRunning() == true) {
+      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
+    }
 
     // Map values for scope plot
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100);
@@ -124,7 +130,6 @@ void setup() {
   // TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
       if (currentAnalogInput1Value > 220 && newread == true) {
         newread = false;
         pulseCount++;
@@ -168,7 +173,7 @@ void loop() {
 void onParse(char* message, int value) {
   if (strcmp(message, "allow-graphing") == 0) {
     allowGraphing = value;
-    serialManager.sendJsonMessage("allow-graphing", allowGraphing);
+    serialManager.sendJsonMessage("graphing", allowGraphing);
   }
   else if (strcmp(message, "pressure-reading") == 0 && value == 1) {
     serialManager.sendJsonMessage(message, analogInput1.readValue());
