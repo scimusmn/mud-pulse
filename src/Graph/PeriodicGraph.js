@@ -32,20 +32,21 @@ class PeriodicGraph extends Component {
   }
 
   shouldComponentUpdate() {
-    return false;
+    return true;
   }
 
   onSerialData(data) {
-    const { resetMessage } = this.props;
+    const { graphing, resetMessage } = this.props;
     const { message } = this.state;
 
     if (!resetMessage) {
-      // if (data.message === 'button-press' && graphing) {
-      //   this.resetGraph();
-      //   this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
-      // } else if (data.message === 'time-up') {
-      //   this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
-      // } else
+      if (data.message === 'button-press' && graphing) {
+        this.resetGraph();
+        this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
+      }
+      if (data.message === 'time-up') {
+        this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
+      }
 
       if (data.message === message
         && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
@@ -124,10 +125,10 @@ class PeriodicGraph extends Component {
 
   render() {
     /* eslint no-return-assign: 0 */
+    const { graphing } = this.props;
     const { backgroundColor, borderColor, type } = this.state;
 
-    const graphClass = 'chart-wrapper';
-    // (graphing) ? 'chart-wrapper' : 'chart-wrapper';
+    const graphClass = (graphing) ? 'chart-wrapper' : 'chart-wrapper d-none';
 
     const graphData = {
       datasets: [{
@@ -162,7 +163,7 @@ class PeriodicGraph extends Component {
 PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
-  // graphing: propTypes.bool.isRequired,
+  graphing: propTypes.bool.isRequired,
   gridColor: propTypes.string,
   message: propTypes.string.isRequired,
   resetMessage: propTypes.bool.isRequired,
