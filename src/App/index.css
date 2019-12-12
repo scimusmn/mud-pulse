@@ -52,3 +52,18 @@ code {
 .national {
   font-family: 'national';
 }
+
+.spinner-container {
+  left: 50%;
+  position: absolute;
+  top: calc(50% - 6em);
+  transform: translate(-50%, -50%);
+}
+
+.spinner-container .spinner-border {
+  border-color: crimson;
+  border-right-color: transparent;
+  border-width: 2em;
+  height: 24em;
+  width: 24em;
+}

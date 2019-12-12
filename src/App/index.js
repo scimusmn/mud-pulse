@@ -1,15 +1,12 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
-import {
-  Col, Container, Row,
-} from 'reactstrap';
+import { Container, Spinner } from 'reactstrap';
 import propTypes from 'prop-types';
 
-import Flipbook from '../Flipbook';
-import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
+import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import './index.css';
 
 class App extends Component {
@@ -19,9 +16,9 @@ class App extends Component {
       anticipatedStrata: [5, 3, 4],
       graphing: false,
       handshake: false,
-      // invalidPulse: false,
-      refreshPortCount: 0,
+      invalidPulse: false,
       pingArduinoStatus: false,
+      refreshPortCount: 0,
       resetMessage: false,
       round: 0,
       step: 0,
@@ -43,16 +40,11 @@ class App extends Component {
   onSerialData(data) {
     const { sendData } = this.props;
     const {
-      anticipatedStrata, graphing, handshake, resetMessage, round, step,
+      anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, round, step,
     } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
-      if (!handshake) {
-        this.setState({
-          handshake: true,
-          step: 1,
-        });
-      }
+      if (!handshake) this.setState({ handshake: true, step: 1 });
 
       this.setState({
         pingArduinoStatus: false,
@@ -63,126 +55,94 @@ class App extends Component {
     if (!resetMessage) {
       if (data.message === 'material') {
         if (data.value === anticipatedStrata[round]) {
-          let strataName = '';
-          switch (anticipatedStrata[round]) {
-            case 2:
-              strataName = 'Limestone';
-              break;
-            case 3:
-              strataName = 'Dolomite';
-              break;
-            case 4:
-              strataName = 'Shale';
-              break;
-            case 5:
-              strataName = 'Sandstone';
-              break;
-            default:
-              strataName = 'Unknown';
-              break;
-          }
-
-          console.log(strataName);
+          this.setState(prevState => ({ step: prevState.step + 1 }));
 
           if (round === 2) {
             this.setState({
-              // invalidPulse: false,
+              invalidPulse: false,
               resetMessage: true,
               round: 0,
             });
           } else {
             this.setState({
-              // invalidPulse: false,
+              invalidPulse: false,
               resetMessage: false,
               round: round + 1,
             });
           }
         } else {
-          // this.setState({
-          //   invalidPulse: true,
-          // });
+          this.setState({ invalidPulse: true });
         }
       }
 
       if (data.message === 'button-press') {
         if (!graphing && round === 0 && step === 5) {
-          this.setState({
-            graphing: true,
-          });
+          if (invalidPulse) this.setState({ invalidPulse: false, step: 3 });
+          else this.setState({ graphing: true });
         } else {
-          if (step === 4) {
-            sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-          }
-
-          this.setState(prevState => ({
-            step: prevState.step + 1,
-          }));
+          if (step === 3) sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+          this.setState(prevState => ({ step: prevState.step + 1 }));
         }
       }
 
       // Ending sampling
       if (data.message === 'time-up') {
         sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
-        this.setState(prevState => ({
-          graphing: false,
-          step: prevState.step,
-        }));
+        this.setState({ graphing: false });
       }
     }
   }
 
   getArtboard() {
-    const { step } = this.state;
+    const { invalidPulse, step } = this.state;
+    if (invalidPulse) return '/images/Screen_15_2019.png';
     let src = '';
 
     switch (step) {
       case 0:
-        src = '/images2/Title_Screen_2019.png';
+        src = '/images/Title_Screen_2019.png';
         break;
       case 1:
-        src = '/images2/Screen_1_2019.png';
+        src = '/images/Screen_1_2019.png';
         break;
       case 2:
-        src = '/images2/Screen_2_2019.png';
+        src = '/images/Screen_2_2019.png';
         break;
       case 3:
-        src = '/images2/Screen_3_2019.png';
+        src = '/images/Screen_3_2019.png';
         break;
       case 4:
-        src = '/images2/Screen_4_2019.png';
+        src = '/images/Screen_4_2019.png';
         break;
       case 5:
-        src = '/images2/Screen_5_2019.png';
+        src = '/images/Screen_5_2019.png';
         break;
       case 6:
-        src = '/images2/Screen_6_2019.png';
+        src = '/images/Screen_6_2019.png';
         break;
       case 7:
-        src = '/images2/Screen_7_2019.png';
+        src = '/images/Screen_7_2019.png';
         break;
       case 8:
-        src = '/images2/Screen_8_2019.png';
+        src = '/images/Screen_8_2019.png';
         break;
       case 9:
-        src = '/images2/Screen_9_2019.png';
+        src = '/images/Screen_9_2019.png';
         break;
       case 10:
-        src = '/images2/Screen_10_2019.png';
+        src = '/images/Screen_10_2019.png';
         break;
       case 11:
-        src = '/images2/Screen_11_2019.png';
+        src = '/images/Screen_11_2019.png';
         break;
       case 12:
-        src = '/images2/Screen_12_2019.png';
+        src = '/images/Screen_12_2019.png';
         break;
       case 13:
-        src = '/images2/Screen_13_2019.png';
+        src = '/images/Screen_13_2019.png';
         break;
       case 14:
-        src = '/images2/Screen_14_2019.png';
-        break;
-      case 15:
-        src = '/images2/Screen_15_2019.png';
+        src = '/images/Screen_14_2019.png';
         break;
       default:
         break;
@@ -195,19 +155,11 @@ class App extends Component {
     const { sendData } = this.props;
     const { pingArduinoStatus } = this.state;
 
-    if (pingArduinoStatus) {
-      this.refreshPorts();
-    }
-
-    this.setState({
-      pingArduinoStatus: true,
-    });
-
+    if (pingArduinoStatus) this.refreshPorts();
+    this.setState({ pingArduinoStatus: true });
     sendData(JSON.stringify(WAKE_ARDUINO));
 
-    setTimeout(() => {
-      this.pingArduino();
-    }, 5000);
+    setTimeout(() => { this.pingArduino(); }, 5000);
   }
 
   refreshPorts() {
@@ -215,32 +167,32 @@ class App extends Component {
     const { refreshPortCount } = this.state;
 
     if (refreshPortCount === 2) {
-      this.setState({
-        handshake: false,
-      });
+      this.setState({ handshake: false });
 
       console.log('sending RESET-PORT');
       sendData(IPC.RESET_PORTS_COMMAND);
-
       console.log('restarting ipcCommunication...');
 
       stopIpcCommunication();
       startIpcCommunication();
     }
 
-    this.setState(prevState => ({
-      refreshPortCount: prevState.refreshPortCount + 1,
-    }));
+    this.setState(prevState => ({ refreshPortCount: prevState.refreshPortCount + 1 }));
   }
 
   render() {
     const {
-      graphing, handshake, resetMessage, round,
+      graphing, handshake, resetMessage, step,
     } = this.state;
 
     if (!handshake) {
       return (
         <Container>
+          <p>
+            Step:
+            {' '}
+            {step}
+          </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
         </Container>
       );
@@ -248,22 +200,19 @@ class App extends Component {
 
     if (resetMessage) {
       setTimeout(() => {
-        // this.setState({
-        //   resetMessage: false,
-        //   strataName: 'Unknown',
-        // });
+        this.setState({ resetMessage: false });
         window.location.reload();
       }, 10000);
     }
 
-    // Dashboard props
-    // console.log(invalidPulse);
-    // console.log(resetMessage);
-    // console.log(anticipatedStrata[round]);
-
     return (
       <Fragment>
         <Container>
+          <p>
+            Step:
+            {' '}
+            {step}
+          </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
           <PeriodicGraphWithSerialCommunication
             graphing={graphing}
@@ -271,19 +220,14 @@ class App extends Component {
             label="Sampled Pulses"
             message="pressure-reading"
             resetMessage={resetMessage}
+            step={step}
             type="line"
             yMax={1023}
           />
+          <div className="spinner-container">
+            <Spinner />
+          </div>
         </Container>
-        <Row className="d-none h-100">
-          <Col md={7} className="h-100 px-0">
-            <Flipbook
-              graphing={graphing}
-              resetMessage={resetMessage}
-              round={round}
-            />
-          </Col>
-        </Row>
       </Fragment>
     );
   }

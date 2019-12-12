@@ -31,10 +31,6 @@ class PeriodicGraph extends Component {
     document.addEventListener('keydown', this.handleReset);
   }
 
-  shouldComponentUpdate() {
-    return true;
-  }
-
   onSerialData(data) {
     const { graphing, resetMessage } = this.props;
     const { message } = this.state;
@@ -125,10 +121,12 @@ class PeriodicGraph extends Component {
 
   render() {
     /* eslint no-return-assign: 0 */
-    const { graphing } = this.props;
+    const { graphing, step } = this.props;
     const { backgroundColor, borderColor, type } = this.state;
 
-    const graphClass = (graphing) ? 'chart-wrapper' : 'chart-wrapper d-none';
+    console.log(graphing);
+
+    const graphClass = (step === 5 || step === 6) ? 'chart-wrapper' : 'chart-wrapper d-none';
 
     const graphData = {
       datasets: [{
@@ -168,6 +166,7 @@ PeriodicGraph.propTypes = {
   message: propTypes.string.isRequired,
   resetMessage: propTypes.bool.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
+  step: propTypes.number.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,
   yMin: propTypes.number,
