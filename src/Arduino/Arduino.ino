@@ -38,10 +38,16 @@ Timer timer1;
 int currentAnalogInput1Value = 0;
 int pulseCount = 0;
 bool newread = true;
-int val = 0;
+int val1;
+int val2;
 int timerDuration = 5000;
-int peakValue = 0;
-int threshold = 50;
+bool rising = false;
+bool triggered = false;
+// Set threshold band
+int hysteresis = 20;
+long timeNow;
+// int peakValue = 0;
+// int threshold = 50;
 
 void setup() {
   // Enables/disables debug messaging from ArduinoJson
@@ -96,6 +102,7 @@ void setup() {
           // Tell application to start listening to data
           pulseCount = 0;
           timer1.start();
+          timeNow = millis();
         }
       }
     }
@@ -104,12 +111,22 @@ void setup() {
   // TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      if (currentAnalogInput1Value > 220 && newread == true) {
-        newread = false;
-        pulseCount++;
+      val1 = currentAnalogInput1Value;
+      if (millis() > timeNow + 100) {
+        val2 = currentAnalogInput1Value;
+        timeNow = millis();
       }
-      if (currentAnalogInput1Value < 190) {
-        newread = true;
+
+      if (val1 >= val2 + hysteresis) {
+        rising = true;
+      } else if ((rising) && (val1 <= val2 - hysteresis)) {
+        rising = false;
+        triggered = true;
+      }
+
+      if (triggered) {
+        pulseCount++;
+        triggered = false;
       }
     }
     else if (ended == true) {
