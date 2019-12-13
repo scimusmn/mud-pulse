@@ -12,6 +12,7 @@ class PeriodicGraph extends Component {
     this.state = {
       backgroundColor: props.backgroundColor,
       borderColor: props.borderColor,
+      graphing: props.graphing,
       gridColor: props.gridColor,
       message: props.message,
       type: props.type,
@@ -31,9 +32,17 @@ class PeriodicGraph extends Component {
     document.addEventListener('keydown', this.handleReset);
   }
 
+  static getDerivedStateFromProps(props) {
+    return { graphing: props.graphing };
+  }
+
+  shouldComponentUpdate() {
+    return true;
+  }
+
   onSerialData(data) {
-    const { graphing, resetMessage } = this.props;
-    const { message } = this.state;
+    const { resetMessage } = this.props;
+    const { graphing, message } = this.state;
 
     if (!resetMessage) {
       if (data.message === 'button-press' && graphing) {
@@ -120,13 +129,9 @@ class PeriodicGraph extends Component {
   }
 
   render() {
-    /* eslint no-return-assign: 0 */
-    const { graphing, step } = this.props;
+    const { step } = this.props;
     const { backgroundColor, borderColor, type } = this.state;
-
-    console.log(graphing);
-
-    const graphClass = (step === 5 || step === 6) ? 'chart-wrapper' : 'chart-wrapper d-none';
+    const graphClass = (step === 5 || step === 9 || step === 13) ? 'chart-wrapper' : 'chart-wrapper d-none';
 
     const graphData = {
       datasets: [{
@@ -139,17 +144,13 @@ class PeriodicGraph extends Component {
       }],
     };
 
-
-    /* eslint arrow-parens: 0 */
-    /* eslint no-return-assign: 0 */
-
     return (
       <Fragment>
         <div className={graphClass}>
           <ChartComponent
             data={graphData}
             options={this.getChartOptions()}
-            ref={(reference) => this.chartReference = reference}
+            ref={(reference) => { this.chartReference = reference; }}
             type={type}
           />
         </div>

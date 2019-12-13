@@ -13,7 +13,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      anticipatedStrata: [5, 3, 4],
+      anticipatedStrata: [3, 4, 5],
       graphing: false,
       handshake: false,
       invalidPulse: false,
@@ -76,11 +76,30 @@ class App extends Component {
       }
 
       if (data.message === 'button-press') {
-        if (!graphing && round === 0 && step === 5) {
-          if (invalidPulse) this.setState({ invalidPulse: false, step: 3 });
-          else this.setState({ graphing: true });
+        if (invalidPulse) {
+          let prevStep = 0;
+          switch (step) {
+            case 5:
+              prevStep = 4;
+              break;
+            case 9:
+              prevStep = 8;
+              break;
+            case 13:
+              prevStep = 12;
+              break;
+            default:
+              break;
+          }
+
+          sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+          this.setState({ invalidPulse: false, step: prevStep });
+        } else if (!graphing && (step === 4 || step === 8 || step === 12)) {
+          this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
         } else {
-          if (step === 3) sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+          if (step === 3 || step === 7 || step === 11) {
+            sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+          }
           this.setState(prevState => ({ step: prevState.step + 1 }));
         }
       }
@@ -194,6 +213,9 @@ class App extends Component {
             {step}
           </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+          <div className="spinner-container">
+            <Spinner />
+          </div>
         </Container>
       );
     }
@@ -224,9 +246,6 @@ class App extends Component {
             type="line"
             yMax={1023}
           />
-          <div className="spinner-container">
-            <Spinner />
-          </div>
         </Container>
       </Fragment>
     );
