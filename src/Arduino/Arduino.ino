@@ -13,7 +13,7 @@
 #include "arduino-base/Libraries/SerialManager.h"
 
 // Use library manager in the Arduino IDE to add this library
-// #include <genieArduino.h>
+#include <genieArduino.h>
 
 #define analogInput1Pin A0
 #define resetLine 4
@@ -32,7 +32,7 @@ long genieBaudRate = 9600;
 AnalogInput analogInput1;
 int traceValue;
 Button button1;
-// Genie genie;
+Genie genie;
 Timer timer1;
 
 int currentAnalogInput1Value = 0;
@@ -53,8 +53,8 @@ void setup() {
   }, arduinoJsonDebug);
 
   // LCD display is on hardware Serial1
-  // Serial1.begin(genieBaudRate);
-  // genie.Begin(Serial1);
+  Serial1.begin(genieBaudRate);
+  genie.Begin(Serial1);
 
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
@@ -71,14 +71,12 @@ void setup() {
   // We need to do averaging or we'll crash the app
   boolean enableAverager = true;
   // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 200;
+  int samplingRate = 5;
   // We don't want use LowPass because that will make the graph not as responsive
   boolean enableLowPass = false;
 
   analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
     currentAnalogInput1Value = analogInputValue;
-
-    serialManager.sendJsonMessage("polling", allowGraphing);
 
     if (allowGraphing == 1 && timer1.isRunning() == true) {
       serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
@@ -91,38 +89,14 @@ void setup() {
   // DIGITAL INPUTS
   button1.setup(button1Pin, [](int state) {
     if (!state) {
+      serialManager.sendJsonMessage("button-press", 1);
       if (allowGraphing == 1) {
         if (timer1.isRunning() == false) {
 
           // Tell application to start listening to data
-          serialManager.sendJsonMessage("button-press", 1);
           pulseCount = 0;
-
-          // Get ready caption
-          //genie.WriteObject(GENIE_OBJ_FORM, 1, 1);
-          //delay(1000);
-
-          // Get set...caption
-          //genie.WriteObject(GENIE_OBJ_FORM, 2, 1);
-          //delay(1000);
-
-          // Go! caption
-          //genie.WriteObject(GENIE_OBJ_FORM, 3, 1);
-          //delay(500);
-
-          // Clear previous data and write zeros width of scope display
-          //for (int i = 0; i < 75; i++) {
-          //  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, 0);
-          //}
-
-          // Show live scope
-          //genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
-
           timer1.start();
         }
-      }
-      else {
-        serialManager.sendJsonMessage("button-press", 1);
       }
     }
   });
@@ -141,19 +115,6 @@ void setup() {
     else if (ended == true) {
       serialManager.sendJsonMessage("time-up", 1);
       serialManager.sendJsonMessage("material", pulseCount);
-      // delay(1000);
-
-      //message sent to computer caption
-      // genie.WriteObject(GENIE_OBJ_FORM, 4, 1);
-
-      //clear previous data and write zeros width of scope display
-      // for (int i = 0; i < 75; i++) {
-      //  genie.WriteObject(GENIE_OBJ_SCOPE, 0, 0);
-      //}
-      // delay(2000);
-
-      // show live scope
-      // genie.WriteObject(GENIE_OBJ_FORM, 0, 1);
     }
   }, timerDuration);
 }
@@ -162,7 +123,7 @@ void loop() {
   analogInput1.idle();
 
   // Write the mapped values
-  // genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
+  genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
   button1.idle();
   serialManager.idle();
