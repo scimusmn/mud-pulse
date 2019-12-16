@@ -76,7 +76,7 @@ class App extends Component {
           }
         }
 
-        if (data.message === 'button-press') {
+        if (data.message === 'button-press' && !graphing) {
           if (invalidPulse) {
             let prevStep = 0;
             switch (step) {

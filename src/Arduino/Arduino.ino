@@ -95,10 +95,9 @@ void setup() {
   // DIGITAL INPUTS
   button1.setup(button1Pin, [](int state) {
     if (!state) {
-      serialManager.sendJsonMessage("button-press", 1);
-      if (allowGraphing == 1) {
-        if (timer1.isRunning() == false) {
-
+      if (timer1.isRunning() == false) {
+        serialManager.sendJsonMessage("button-press", 1);
+        if (allowGraphing == 1) {
           // Tell application to start listening to data
           pulseCount = 0;
           timer1.start();
