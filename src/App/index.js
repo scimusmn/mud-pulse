@@ -52,62 +52,64 @@ class App extends Component {
       });
     }
 
-    if (!resetMessage) {
-      if (data.message === 'material') {
-        if (data.value === anticipatedStrata[round]) {
-          this.setState(prevState => ({ step: prevState.step + 1 }));
+    if (handshake) {
+      if (!resetMessage) {
+        if (data.message === 'material') {
+          if (data.value === anticipatedStrata[round]) {
+            this.setState(prevState => ({ step: prevState.step + 1 }));
 
-          if (round === 2) {
-            this.setState({
-              invalidPulse: false,
-              resetMessage: true,
-              round: 0,
-            });
+            if (round === 2) {
+              this.setState({
+                invalidPulse: false,
+                resetMessage: true,
+                round: 0,
+              });
+            } else {
+              this.setState({
+                invalidPulse: false,
+                resetMessage: false,
+                round: round + 1,
+              });
+            }
           } else {
-            this.setState({
-              invalidPulse: false,
-              resetMessage: false,
-              round: round + 1,
-            });
+            this.setState({ invalidPulse: true });
           }
-        } else {
-          this.setState({ invalidPulse: true });
         }
-      }
 
-      if (data.message === 'button-press') {
-        if (invalidPulse) {
-          let prevStep = 0;
-          switch (step) {
-            case 5:
-              prevStep = 4;
-              break;
-            case 9:
-              prevStep = 8;
-              break;
-            case 13:
-              prevStep = 12;
-              break;
-            default:
-              break;
-          }
+        if (data.message === 'button-press') {
+          if (invalidPulse) {
+            let prevStep = 0;
+            switch (step) {
+              case 5:
+                prevStep = 4;
+                break;
+              case 9:
+                prevStep = 8;
+                break;
+              case 13:
+                prevStep = 12;
+                break;
+              default:
+                break;
+            }
 
-          sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-          this.setState({ invalidPulse: false, step: prevStep });
-        } else if (!graphing && (step === 4 || step === 8 || step === 12)) {
-          this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
-        } else {
-          if (step === 3 || step === 7 || step === 11) {
             sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+            this.setState({ invalidPulse: false, step: prevStep });
+          } else if (!graphing && (step === 4 || step === 8 || step === 12)) {
+            this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
+          } else {
+            if (step === 3 || step === 7 || step === 11) {
+              sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+            }
+            this.setState(prevState => ({ step: prevState.step + 1 }));
           }
-          this.setState(prevState => ({ step: prevState.step + 1 }));
         }
-      }
 
-      // Ending sampling
-      if (data.message === 'time-up') {
-        sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
-        this.setState({ graphing: false });
+        // Ending sampling
+        if (data.message === 'time-up') {
+          sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
+          this.setState({ graphing: false });
+        }
       }
     }
   }
