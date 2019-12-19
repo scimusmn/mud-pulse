@@ -25,6 +25,7 @@ class App extends Component {
     };
 
     this.getArtboard = this.getArtboard.bind(this);
+    this.getSpinnerMessage = this.getSpinnerMessage.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
@@ -116,60 +117,72 @@ class App extends Component {
 
   getArtboard() {
     const { invalidPulse, step } = this.state;
-    if (invalidPulse) return '/images/Screen_15_2019.png';
-    let src = '';
+    if (invalidPulse) {
+      switch (step) {
+        case 5:
+          return '/images/Layer1_ErrorScreen.png';
+        case 9:
+          return '/images/Layer2_ErrorScreen.png';
+        case 13:
+          return '/images/Layer3_ErrorScreen.png';
+        default:
+          return '';
+      }
+    }
 
     switch (step) {
       case 0:
-        src = '/images/Title_Screen_2019.png';
-        break;
+        return '/images/Title_Screen_2019.png';
       case 1:
-        src = '/images/Screen_1_2019.png';
-        break;
+        return '/images/Screen_1_2019.png';
       case 2:
-        src = '/images/Screen_2_2019.png';
-        break;
+        return '/images/Screen_2_2019.png';
       case 3:
-        src = '/images/Screen_3_2019.png';
-        break;
+        return '/images/Screen_3_2019.png';
       case 4:
-        src = '/images/Screen_4_2019.png';
-        break;
+        return '/images/First_Layer.png';
       case 5:
-        src = '/images/Screen_5_2019.png';
-        break;
+        return '/images/First_Layer-1.png';
       case 6:
-        src = '/images/Screen_6_2019.png';
-        break;
+        return '/images/Second_Layer.png';
       case 7:
-        src = '/images/Screen_7_2019.png';
-        break;
+        return '/images/Second_Layer-1.png';
       case 8:
-        src = '/images/Screen_8_2019.png';
-        break;
+        return '/images/Second_Layer-2.png';
       case 9:
-        src = '/images/Screen_9_2019.png';
-        break;
+        return '/images/Second_Layer-3.png';
       case 10:
-        src = '/images/Screen_10_2019.png';
-        break;
+        return '/images/Third_Layer-3.png';
       case 11:
-        src = '/images/Screen_11_2019.png';
-        break;
+        return '/images/Third_Layer.png';
       case 12:
-        src = '/images/Screen_12_2019.png';
-        break;
+        return '/images/Third_Layer-1.png';
       case 13:
-        src = '/images/Screen_13_2019.png';
-        break;
+        return '/images/Third_Layer-2.png';
       case 14:
-        src = '/images/Screen_14_2019.png';
-        break;
+        return '/images/Oil_Layer.png';
       default:
-        break;
+        return '';
     }
+  }
 
-    return src;
+  getSpinnerMessage() {
+    const { step } = this.state;
+
+    switch (step) {
+      case 3:
+        return 'Drilling has started...';
+      case 5:
+      case 9:
+      case 13:
+        return 'Receiving data...';
+      case 7:
+      case 11:
+        return 'Resume Drilling...';
+      case 0:
+      default:
+        return '';
+    }
   }
 
   pingArduino() {
@@ -202,25 +215,7 @@ class App extends Component {
   }
 
   render() {
-    const {
-      graphing, handshake, resetMessage, step,
-    } = this.state;
-
-    if (!handshake) {
-      return (
-        <Container>
-          <p>
-            Step:
-            {' '}
-            {step}
-          </p>
-          <img alt="Artboard" className="artboard" src={this.getArtboard()} />
-          <div className="spinner-container">
-            <Spinner />
-          </div>
-        </Container>
-      );
-    }
+    const { resetMessage, step } = this.state;
 
     if (resetMessage) {
       setTimeout(() => {
@@ -228,6 +223,11 @@ class App extends Component {
         window.location.reload();
       }, 10000);
     }
+
+    const spinnerVisibilityClass = (
+      step === 0 || step === 3 || step === 5 || step === 7
+      || step === 9 || step === 11 || step === 13
+    ) ? 'spinner-container' : 'd-none spinner-container';
 
     return (
       <Fragment>
@@ -238,8 +238,11 @@ class App extends Component {
             {step}
           </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+          <div className={spinnerVisibilityClass}>
+            <Spinner />
+            <span className="text-light">{this.getSpinnerMessage()}</span>
+          </div>
           <PeriodicGraphWithSerialCommunication
-            graphing={graphing}
             gridColor="rgb(255, 255, 255)"
             label="Sampled Pulses"
             message="pressure-reading"

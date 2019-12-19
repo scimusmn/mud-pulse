@@ -12,7 +12,6 @@ class PeriodicGraph extends Component {
     this.state = {
       backgroundColor: props.backgroundColor,
       borderColor: props.borderColor,
-      graphing: props.graphing,
       gridColor: props.gridColor,
       message: props.message,
       type: props.type,
@@ -41,14 +40,15 @@ class PeriodicGraph extends Component {
   }
 
   onSerialData(data) {
-    const { resetMessage } = this.props;
-    const { graphing, message } = this.state;
+    const { resetMessage, step } = this.props;
+    const { message } = this.state;
 
     if (!resetMessage) {
-      if (data.message === 'button-press' && graphing) {
+      if (data.message === 'button-press' && (step === 4 || step === 8 || step === 12)) {
         this.resetGraph();
         this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
       }
+
       if (data.message === 'time-up') {
         this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
       }
@@ -162,7 +162,6 @@ class PeriodicGraph extends Component {
 PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
-  graphing: propTypes.bool.isRequired,
   gridColor: propTypes.string,
   message: propTypes.string.isRequired,
   resetMessage: propTypes.bool.isRequired,
