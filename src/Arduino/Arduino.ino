@@ -127,14 +127,14 @@ void loop() {
   timer1.idle();
 }
 
-
 void onParse(char* message, int value) {
   if (strcmp(message, "allow-graphing") == 0) {
     allowGraphing = value;
-    serialManager.sendJsonMessage("graphing", allowGraphing);
-  }
-  else if (strcmp(message, "pressure-reading") == 0 && value == 1) {
-    serialManager.sendJsonMessage(message, analogInput1.readValue());
+    if ((allowGraphing) && (timer1.isRunning() == false)) {
+      // Tell application to start listening to data
+      pulseCount = 0;
+      timer1.start();
+      timeNow = millis();    
   }
   else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
     serialManager.sendJsonMessage("arduino-ready", 1);
