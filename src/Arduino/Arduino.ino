@@ -8,7 +8,6 @@
 // Refer to Visi-Genie Gauge documentation for object names
 
 #include "arduino-base/Libraries/AnalogInput.h"
-#include "arduino-base/Libraries/Button.h"
 #include "arduino-base/Libraries/Timer.h"
 #include "arduino-base/Libraries/SerialManager.h"
 
@@ -17,7 +16,6 @@
 
 #define analogInput1Pin A0
 #define resetLine 4
-#define button1Pin 2
 
 // Mud Pulse state management since we're using the button to do multiple things
 int allowGraphing = 0;
@@ -31,7 +29,6 @@ long genieBaudRate = 9600;
 
 AnalogInput analogInput1;
 int traceValue;
-Button button1;
 Genie genie;
 Timer timer1;
 
@@ -92,21 +89,6 @@ void setup() {
     traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100);
   });
 
-  // DIGITAL INPUTS
-  button1.setup(button1Pin, [](int state) {
-    if (!state) {
-      if (timer1.isRunning() == false) {
-        serialManager.sendJsonMessage("button-press", 1);
-        if (allowGraphing == 1) {
-          // Tell application to start listening to data
-          pulseCount = 0;
-          timer1.start();
-          timeNow = millis();
-        }
-      }
-    }
-  });
-
   // TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
@@ -141,7 +123,6 @@ void loop() {
   // Write the mapped values
   genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
-  button1.idle();
   serialManager.idle();
   timer1.idle();
 }
