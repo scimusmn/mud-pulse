@@ -7,7 +7,7 @@
 // DO NOT power display using built-in 5V regulator on Arduino
 // Refer to Visi-Genie Gauge documentation for object names
 
-#include "arduino-base/Libraries/AnalogInput.h"
+#include "arduino-base/Libraries/Averager.h"/
 #include "arduino-base/Libraries/Timer.h"
 #include "arduino-base/Libraries/SerialManager.h"
 
@@ -27,12 +27,12 @@ long steleBaudRate = 115200;
 // Genie communication
 long genieBaudRate = 9600;
 
-AnalogInput analogInput1;
 int traceValue;
 Genie genie;
 Timer timer1;
+Averager averager;
 
-int currentAnalogInput1Value = 0;
+int averagePressure = 0;
 int pulseCount = 0;
 bool newread = true;
 int val1;
@@ -59,6 +59,8 @@ void setup() {
   Serial1.begin(genieBaudRate);
   genie.Begin(Serial1);
 
+  pinMode(analogInput1Pin, INPUT);
+  
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
 
@@ -70,31 +72,31 @@ void setup() {
   digitalWrite(resetLine, 1);
   delay(4000);
 
-  // ANALOG INPUTS
-  // We need to do averaging or we'll crash the app
-  boolean enableAverager = true;
-  // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 5;
-  // We don't want use LowPass because that will make the graph not as responsive
-  boolean enableLowPass = false;
-
-  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
-    currentAnalogInput1Value = analogInputValue;
-
-    if (allowGraphing == 1 && timer1.isRunning() == true) {
-      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
-    }
-
-    // Map values for scope plot
-    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100);
-  });
+//  // ANALOG INPUTS
+//  // We need to do averaging or we'll crash the app
+//  boolean enableAverager = true;
+//  // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
+//  int samplingRate = 5;
+//  // We don't want use LowPass because that will make the graph not as responsive
+//  boolean enableLowPass = false;
+//
+//  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
+//    currentAnalogInput1Value = analogInputValue;
+//
+//    if (allowGraphing == 1 && timer1.isRunning() == true) {
+//      serialManager.sendJsonMessage("pressure-reading", currentAnalogInput1Value);
+//    }
+//
+//    // Map values for scope plot
+//    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100);
+//  });
 
   // TIMER
   timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
     if (running == true) {
-      val1 = currentAnalogInput1Value;
+      val1 = averagePressure;
       if (millis() > timeNow + 100) {
-        val2 = currentAnalogInput1Value;
+        val2 = averagePressure;
         timeNow = millis();
       }
 
@@ -118,9 +120,15 @@ void setup() {
 }
 
 void loop() {
-  analogInput1.idle();
+  averager.insertNewSample(analogRead(analogInput1Pin));
+  averagePressure = averager.calculateAverage();  
+  traceValue = map(averagePressure, 0, 1023, 0, 100);
 
-  // Write the mapped values
+  if (allowGraphing){
+    serialManager.sendJsonMessage("pressure-reading", averagePressure);
+  }
+  
+  // Write the mapped values  
   genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
   serialManager.idle();
@@ -128,13 +136,17 @@ void loop() {
 }
 
 void onParse(char* message, int value) {
-  if (strcmp(message, "allow-graphing") == 0) {
-    allowGraphing = value;
-    if ((allowGraphing) && (timer1.isRunning() == false)) {
-      // Tell application to start listening to data
-      pulseCount = 0;
-      timer1.start();
-      timeNow = millis();    
+  if (strcmp(message, "allow-graphing") == 0) { // Tell arduino to send 5 sec of pres data
+    allowGraphing = value;    
+    if (allowGraphing){
+     // serialManager.sendJsonMessage("graph", 1);
+      if (timer1.isRunning() == false) {
+      //  serialManager.sendJsonMessage("time", 0);
+        pulseCount = 0;
+        timer1.start();
+        timeNow = millis();    
+      }
+    }    
   }
   else if (strcmp(message, "wake-arduino") == 0 && value == 1) {
     serialManager.sendJsonMessage("arduino-ready", 1);
