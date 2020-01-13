@@ -128,7 +128,7 @@ class App extends Component {
     //     return 'Resume Drilling...';
   }
 
-  sendClick() {
+  nextClick() {
     const { step, layer } = this.state;
     let prevStep;
     let prevLayer;
@@ -208,7 +208,7 @@ class App extends Component {
           <Button
             className={buttonVisibilityClass}
             color="primary"
-            onClick={() => this.sendClick()}
+            onClick={() => this.nextClick()}
           >
           NEXT
           </Button>
