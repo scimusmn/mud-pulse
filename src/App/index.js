@@ -18,7 +18,7 @@ class App extends Component {
       pingArduinoStatus: false,
       refreshPortCount: 0,
       layer: 0,
-      step: 2,
+      step: 1,
       graphing: false,
     };
 
@@ -66,6 +66,8 @@ class App extends Component {
     const { step, layer } = this.state;
 
     switch (true) {
+      case ((layer === 0) && (step === 1)):
+        return '/images/Screen_0_2019.png';
       case ((layer === 0) && (step === 2)):
         return '/images/Title_Screen_2019.png';
       case ((layer === 0) && (step === 3)):
