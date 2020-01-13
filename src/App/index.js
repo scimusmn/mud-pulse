@@ -168,7 +168,7 @@ class App extends Component {
   }
 
   render() {
-    const { resetMessage, step } = this.state;
+    const { resetMessage, step, layer } = this.state;
 
     if (resetMessage) {
       setTimeout(() => {
@@ -178,13 +178,17 @@ class App extends Component {
     }
 
     const spinnerVisibilityClass = (
-      step === 0 || step === 3 || step === 5 || step === 7
-      || step === 9 || step === 11 || step === 13
+      step === 2
     ) ? 'spinner-container' : 'd-none spinner-container';
 
     return (
       <Fragment>
         <Container>
+          <p>
+            Layer:
+            {' '}
+            {layer}
+          </p>
           <p>
             Step:
             {' '}
