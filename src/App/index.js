@@ -17,9 +17,9 @@ class App extends Component {
       handshake: false,
       pingArduinoStatus: false,
       refreshPortCount: 0,
-      resetMessage: false,
       layer: 0,
       step: 2,
+      graphing: false,
     };
 
     this.getArtboard = this.getArtboard.bind(this);
@@ -37,13 +37,12 @@ class App extends Component {
   }
 
   onSerialData(data) {
-    // const { sendData } = this.props;
     const {
-      anticipatedStrata, handshake, resetMessage, layer,
+      anticipatedStrata, handshake, layer,
     } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
-      if (!handshake) this.setState({ handshake: true, step: 1 });
+      if (!handshake) this.setState({ handshake: true, step: 2, layer: 0 });
 
       this.setState({
         pingArduinoStatus: false,
@@ -52,14 +51,13 @@ class App extends Component {
     }
 
     if (handshake) {
-      if (!resetMessage) {
-        if (data.message === 'material' && layer > 0) {
-          if (data.value === anticipatedStrata[layer - 1]) {
-            this.setState(prevState => ({ step: prevState.step + 2 }));
-          } else {
-            this.setState(prevState => ({ step: prevState.step + 1 }));
-          }
+      if (data.message === 'material' && layer > 0) {
+        if (data.value === anticipatedStrata[layer - 1]) {
+          this.setState({ step: 4 });
+        } else {
+          this.setState({ step: 3 });
         }
+        this.setState({ graphing: false });
       }
     }
   }
@@ -112,26 +110,20 @@ class App extends Component {
   }
 
   getSpinnerMessage() {
-    const { step } = this.state;
+    const { step, layer, graphing } = this.state;
+    const { sendData } = this.props;
 
-    if (step === 2 || step === 3) {
+    if ((step === 2 || step === 3) && layer !== 0) {
+      if (!graphing) {
+        sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+        this.setState({ graphing: true });
+      }
       return 'Receiving data...';
     }
     return '';
-    // switch (step) {
-    //   case 3:
     //     return 'Drilling has started...';
-    //   case 5:
-    //   case 9:
-    //   case 13:
     //     return 'Receiving data...';
-    //   case 7:
-    //   case 11:
     //     return 'Resume Drilling...';
-    //   case 0:
-    //   default:
-    //     return '';
-    // }
   }
 
   sendClick() {
@@ -147,6 +139,7 @@ class App extends Component {
     }
     if (prevLayer > 4) {
       prevLayer = 0;
+      prevStep = 2;
     }
     this.setState({ layer: prevLayer, step: prevStep });
   }
@@ -181,18 +174,20 @@ class App extends Component {
   }
 
   render() {
-    const { resetMessage, step, layer } = this.state;
+    const {
+      step, layer, graphing,
+    } = this.state;
 
-    if (resetMessage) {
-      setTimeout(() => {
-        this.setState({ resetMessage: false });
-        window.location.reload();
-      }, 10000);
-    }
+    // if (resetMessage) {
+    //   setTimeout(() => {
+    //     this.setState({ resetMessage: false });
+    //     window.location.reload();
+    //   }, 10000);
+    // }
 
-    const spinnerVisibilityClass = (
-      step === 2 || step === 3
-    ) ? 'spinner-container' : 'd-none spinner-container';
+    const spinnerVisibilityClass = (graphing) ? 'spinner-container' : 'd-none spinner-container';
+
+    const buttonVisibilityClass = (!graphing) ? 'next-btn' : 'next-btn';
 
     return (
       <Fragment>
@@ -209,7 +204,7 @@ class App extends Component {
           </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
           <Button
-            className="next-btn"
+            className={buttonVisibilityClass}
             color="primary"
             onClick={() => this.sendClick()}
           >
@@ -223,8 +218,7 @@ class App extends Component {
             gridColor="rgb(255, 255, 255)"
             label="Sampled Pulses"
             message="pressure-reading"
-            resetMessage={resetMessage}
-            step={step}
+            graphing={graphing}
             type="line"
             yMax={1023}
           />
