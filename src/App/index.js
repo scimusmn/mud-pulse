@@ -57,9 +57,9 @@ class App extends Component {
       if (!resetMessage) {
         if (data.message === 'material' && layer > 0) {
           if (data.value === anticipatedStrata[layer - 1]) {
-            this.setState(prevState => ({ step: prevState.step + 1 }));
-          } else {
             this.setState(prevState => ({ step: prevState.step + 2 }));
+          } else {
+            this.setState(prevState => ({ step: prevState.step + 1 }));
           }
         }
 
@@ -79,41 +79,41 @@ class App extends Component {
       case ((layer === 0) && (step === 1)):
         return '/images/Title_Screen_2019.png';
       case ((layer === 0) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Screen_1_2019.png';
       case ((layer === 0) && (step === 3)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Screen_2_2019.png';
       case ((layer === 1) && (step === 1)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/First_Layer.png';
       case ((layer === 1) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/First_Layer_analysis.png';
       case ((layer === 1) && (step === 3)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/First_Layer_Error_Screen.png';
       case ((layer === 1) && (step === 4)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/First_Layer_identified.png';
       case ((layer === 2) && (step === 1)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Second_Layer.png';
       case ((layer === 2) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Second_Layer_analysis.png';
       case ((layer === 2) && (step === 3)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Second_Layer_Error_Screen.png';
       case ((layer === 2) && (step === 4)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Second_Layer_identified.png';
       case ((layer === 3) && (step === 1)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Third_Layer.png';
       case ((layer === 3) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Third_Layer_analysis.png';
       case ((layer === 3) && (step === 3)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Third_Layer_Error_Screen.png';
       case ((layer === 3) && (step === 4)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Third_Layer_identified.png';
       case ((layer === 4) && (step === 1)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Fourth_Layer.png';
       case ((layer === 4) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Fourth_Layer_analysis.png';
       case ((layer === 4) && (step === 3)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Fourth_Layer_Error_Screen.png';
       case ((layer === 4) && (step === 4)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/Fourth_Layer_identified.png';
       default:
         return '';
     }
