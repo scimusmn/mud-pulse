@@ -13,14 +13,14 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      anticipatedStrata: [3, 4, 5],
+      anticipatedStrata: [3, 4, 5, 2],
       graphing: false,
       handshake: false,
       invalidPulse: false,
       pingArduinoStatus: false,
       refreshPortCount: 0,
       resetMessage: false,
-      round: 0,
+      layer: 0,
       step: 0,
     };
 
@@ -41,7 +41,7 @@ class App extends Component {
   onSerialData(data) {
     const { sendData } = this.props;
     const {
-      anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, round, step,
+      anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, layer, step,
     } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
@@ -55,21 +55,21 @@ class App extends Component {
 
     if (handshake) {
       if (!resetMessage) {
-        if (data.message === 'material') {
-          if (data.value === anticipatedStrata[round]) {
+        if (data.message === 'material' && layer > 0) {
+          if (data.value === anticipatedStrata[layer - 1]) {
             this.setState(prevState => ({ step: prevState.step + 1 }));
 
-            if (round === 2) {
+            if (layer === 4) {
               this.setState({
                 invalidPulse: false,
                 resetMessage: true,
-                round: 0,
+                layer: 0,
               });
             } else {
               this.setState({
                 invalidPulse: false,
                 resetMessage: false,
-                round: round + 1,
+                layer: layer + 1,
               });
             }
           } else {
