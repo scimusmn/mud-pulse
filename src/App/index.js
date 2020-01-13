@@ -14,14 +14,12 @@ class App extends Component {
     super(props);
     this.state = {
       anticipatedStrata: [3, 4, 5, 2],
-      graphing: false,
       handshake: false,
-      invalidPulse: false,
       pingArduinoStatus: false,
       refreshPortCount: 0,
       resetMessage: false,
       layer: 0,
-      step: 0,
+      step: 1,
     };
 
     this.getArtboard = this.getArtboard.bind(this);
@@ -39,9 +37,9 @@ class App extends Component {
   }
 
   onSerialData(data) {
-    const { sendData } = this.props;
+    // const { sendData } = this.props;
     const {
-      anticipatedStrata, graphing, handshake, resetMessage, layer, step,
+      anticipatedStrata, handshake, resetMessage, layer,
     } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
@@ -61,12 +59,6 @@ class App extends Component {
           } else {
             this.setState(prevState => ({ step: prevState.step + 1 }));
           }
-        }
-
-        // Ending sampling
-        if (data.message === 'time-up') {
-          sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
-          this.setState({ graphing: false });
         }
       }
     }
