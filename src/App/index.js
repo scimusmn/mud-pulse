@@ -41,7 +41,7 @@ class App extends Component {
   onSerialData(data) {
     const { sendData } = this.props;
     const {
-      anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, layer, step,
+      anticipatedStrata, graphing, handshake, resetMessage, layer, step,
     } = this.state;
 
     if (data.message === ARDUINO_READY.message) {
@@ -58,51 +58,8 @@ class App extends Component {
         if (data.message === 'material' && layer > 0) {
           if (data.value === anticipatedStrata[layer - 1]) {
             this.setState(prevState => ({ step: prevState.step + 1 }));
-
-            if (layer === 4) {
-              this.setState({
-                invalidPulse: false,
-                resetMessage: true,
-                layer: 0,
-              });
-            } else {
-              this.setState({
-                invalidPulse: false,
-                resetMessage: false,
-                layer: layer + 1,
-              });
-            }
           } else {
-            this.setState({ invalidPulse: true });
-          }
-        }
-
-        if (data.message === 'button-press' && !graphing) {
-          if (invalidPulse) {
-            let prevStep = 0;
-            switch (step) {
-              case 5:
-                prevStep = 4;
-                break;
-              case 9:
-                prevStep = 8;
-                break;
-              case 13:
-                prevStep = 12;
-                break;
-              default:
-                break;
-            }
-
-            sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-            this.setState({ invalidPulse: false, step: prevStep });
-          } else if (!graphing && (step === 4 || step === 8 || step === 12)) {
-            this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
-          } else {
-            if (step === 3 || step === 7 || step === 11) {
-              sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-            }
-            this.setState(prevState => ({ step: prevState.step + 1 }));
+            this.setState(prevState => ({ step: prevState.step + 2 }));
           }
         }
 
@@ -116,51 +73,47 @@ class App extends Component {
   }
 
   getArtboard() {
-    const { invalidPulse, step } = this.state;
-    if (invalidPulse) {
-      switch (step) {
-        case 5:
-          return '/images/Layer1_ErrorScreen.png';
-        case 9:
-          return '/images/Layer2_ErrorScreen.png';
-        case 13:
-          return '/images/Layer3_ErrorScreen.png';
-        default:
-          return '';
-      }
-    }
+    const { step, layer } = this.state;
 
-    switch (step) {
-      case 0:
+    switch (true) {
+      case ((layer === 0) && (step === 1)):
         return '/images/Title_Screen_2019.png';
-      case 1:
-        return '/images/Screen_1_2019.png';
-      case 2:
-        return '/images/Screen_2_2019.png';
-      case 3:
-        return '/images/Screen_3_2019.png';
-      case 4:
-        return '/images/First_Layer.png';
-      case 5:
-        return '/images/First_Layer-1.png';
-      case 6:
-        return '/images/Second_Layer.png';
-      case 7:
-        return '/images/Second_Layer-1.png';
-      case 8:
-        return '/images/Second_Layer-2.png';
-      case 9:
-        return '/images/Second_Layer-3.png';
-      case 10:
-        return '/images/Third_Layer-3.png';
-      case 11:
-        return '/images/Third_Layer.png';
-      case 12:
-        return '/images/Third_Layer-1.png';
-      case 13:
-        return '/images/Third_Layer-2.png';
-      case 14:
-        return '/images/Oil_Layer.png';
+      case ((layer === 0) && (step === 2)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 0) && (step === 3)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 1) && (step === 1)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 1) && (step === 2)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 1) && (step === 3)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 1) && (step === 4)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 2) && (step === 1)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 2) && (step === 2)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 2) && (step === 3)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 2) && (step === 4)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 3) && (step === 1)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 3) && (step === 2)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 3) && (step === 3)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 3) && (step === 4)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 4) && (step === 1)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 4) && (step === 2)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 4) && (step === 3)):
+        return '/images/Title_Screen_2019.png';
+      case ((layer === 4) && (step === 4)):
+        return '/images/Title_Screen_2019.png';
       default:
         return '';
     }
