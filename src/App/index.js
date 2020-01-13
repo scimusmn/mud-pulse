@@ -19,7 +19,7 @@ class App extends Component {
       refreshPortCount: 0,
       resetMessage: false,
       layer: 0,
-      step: 1,
+      step: 2,
     };
 
     this.getArtboard = this.getArtboard.bind(this);
@@ -68,11 +68,11 @@ class App extends Component {
     const { step, layer } = this.state;
 
     switch (true) {
-      case ((layer === 0) && (step === 1)):
-        return '/images/Title_Screen_2019.png';
       case ((layer === 0) && (step === 2)):
-        return '/images/Screen_1_2019.png';
+        return '/images/Title_Screen_2019.png';
       case ((layer === 0) && (step === 3)):
+        return '/images/Screen_1_2019.png';
+      case ((layer === 0) && (step === 4)):
         return '/images/Screen_2_2019.png';
       case ((layer === 1) && (step === 1)):
         return '/images/First_Layer.png';
@@ -114,20 +114,41 @@ class App extends Component {
   getSpinnerMessage() {
     const { step } = this.state;
 
-    switch (step) {
-      case 3:
-        return 'Drilling has started...';
-      case 5:
-      case 9:
-      case 13:
-        return 'Receiving data...';
-      case 7:
-      case 11:
-        return 'Resume Drilling...';
-      case 0:
-      default:
-        return '';
+    if (step === 2 || step === 3) {
+      return 'Receiving data...';
     }
+    return '';
+    // switch (step) {
+    //   case 3:
+    //     return 'Drilling has started...';
+    //   case 5:
+    //   case 9:
+    //   case 13:
+    //     return 'Receiving data...';
+    //   case 7:
+    //   case 11:
+    //     return 'Resume Drilling...';
+    //   case 0:
+    //   default:
+    //     return '';
+    // }
+  }
+
+  sendClick() {
+    const { step, layer } = this.state;
+    let prevStep;
+    let prevLayer;
+    prevStep = step;
+    prevLayer = layer;
+    prevStep += 1;
+    if (prevStep > 4) {
+      prevLayer += 1;
+      prevStep = 1;
+    }
+    if (prevLayer > 4) {
+      prevLayer = 0;
+    }
+    this.setState({ layer: prevLayer, step: prevStep });
   }
 
   pingArduino() {
@@ -170,7 +191,7 @@ class App extends Component {
     }
 
     const spinnerVisibilityClass = (
-      step === 2
+      step === 2 || step === 3
     ) ? 'spinner-container' : 'd-none spinner-container';
 
     return (
