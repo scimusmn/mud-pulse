@@ -26,6 +26,12 @@ code {
   width: 100%;
 }
 
+.next-btn {
+  left: 50%;
+  position: absolute;
+  top: 50%;
+}
+
 .chart-wrapper {
   bottom: 13%;
   height: 300px;

@@ -1,6 +1,6 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
-import { Container, Spinner } from 'reactstrap';
+import { Container, Spinner, Button } from 'reactstrap';
 import propTypes from 'prop-types';
 
 import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
@@ -187,6 +187,13 @@ class App extends Component {
             {step}
           </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+          <Button
+            className="next-btn"
+            color="primary"
+            onClick={() => this.sendClick()}
+          >
+          NEXT
+          </Button>
           <div className={spinnerVisibilityClass}>
             <Spinner />
             <span className="text-light">{this.getSpinnerMessage()}</span>
