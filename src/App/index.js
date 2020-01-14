@@ -13,7 +13,7 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      anticipatedStrata: [3, 4, 5, 2],
+      anticipatedStrata: [3, 4, 2, 5],
       handshake: false,
       pingArduinoStatus: false,
       refreshPortCount: 0,
