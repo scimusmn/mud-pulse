@@ -23,7 +23,6 @@ class App extends Component {
     };
 
     this.getArtboard = this.getArtboard.bind(this);
-    this.getSpinnerMessage = this.getSpinnerMessage.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
@@ -111,30 +110,21 @@ class App extends Component {
     }
   }
 
-  getSpinnerMessage() {
-    const { step, layer, graphing } = this.state;
-    const { sendData } = this.props;
-
-    if ((step === 2 || step === 3) && layer !== 0) {
-      if (!graphing) {
-        sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-        this.setState({ graphing: true });
-      }
-      return 'Receiving data...';
-    }
-    return '';
-    //     return 'Drilling has started...';
-    //     return 'Receiving data...';
-    //     return 'Resume Drilling...';
-  }
-
   nextClick() {
     const { step, layer } = this.state;
+    const { sendData } = this.props;
     let prevStep;
     let prevLayer;
     prevStep = step;
     prevLayer = layer;
-    prevStep += 1;
+    if (prevStep === 3 && layer !== 0) {
+      this.setState({ graphing: true });
+      sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+    } else prevStep += 1;
+    if (prevStep === 2 && layer !== 0) {
+      this.setState({ graphing: true });
+      sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+    }
     if (prevStep > 4) {
       prevLayer += 1;
       prevStep = 1;
@@ -189,7 +179,7 @@ class App extends Component {
 
     const spinnerVisibilityClass = (graphing) ? 'spinner-container' : 'd-none spinner-container';
 
-    const buttonVisibilityClass = (!graphing) ? 'next-btn' : 'next-btn';
+    const buttonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
 
     return (
       <Fragment>
@@ -214,7 +204,7 @@ class App extends Component {
           </Button>
           <div className={spinnerVisibilityClass}>
             <Spinner />
-            <span className="text-light">{this.getSpinnerMessage()}</span>
+            <span className="text-light">Receiving data...</span>
           </div>
           <PeriodicGraphWithSerialCommunication
             gridColor="rgb(255, 255, 255)"
