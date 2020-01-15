@@ -44,7 +44,7 @@ class PeriodicGraph extends Component {
     const { message } = this.state;
 
     if (!resetMessage) {
-      if (data.message === 'button-press' && (step === 4 || step === 8 || step === 12)) {
+      if (data.message === 'button-press' && (step === 3 || step === 6 || step === 9)) {
         this.resetGraph();
         this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
       }
@@ -131,7 +131,7 @@ class PeriodicGraph extends Component {
   render() {
     const { step } = this.props;
     const { backgroundColor, borderColor, type } = this.state;
-    const graphClass = (step === 5 || step === 9 || step === 13) ? 'chart-wrapper' : 'chart-wrapper d-none';
+    const graphClass = (step === 4 || step === 7 || step === 10) ? 'chart-wrapper' : 'chart-wrapper d-none';
 
     const graphData = {
       datasets: [{

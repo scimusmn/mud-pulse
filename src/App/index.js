@@ -81,14 +81,14 @@ class App extends Component {
           if (invalidPulse) {
             let prevStep = 0;
             switch (step) {
-              case 5:
-                prevStep = 4;
+              case 4:
+                prevStep = 3;
                 break;
-              case 9:
-                prevStep = 8;
+              case 7:
+                prevStep = 6;
                 break;
-              case 13:
-                prevStep = 12;
+              case 10:
+                prevStep = 9;
                 break;
               default:
                 break;
@@ -96,10 +96,10 @@ class App extends Component {
 
             sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
             this.setState({ invalidPulse: false, step: prevStep });
-          } else if (!graphing && (step === 4 || step === 8 || step === 12)) {
+          } else if (!graphing && (step === 3 || step === 6 || step === 9)) {
             this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
           } else {
-            if (step === 3 || step === 7 || step === 11) {
+            if (step === 2 || step === 5 || step === 8) {
               sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
             }
             this.setState(prevState => ({ step: prevState.step + 1 }));
@@ -119,11 +119,11 @@ class App extends Component {
     const { invalidPulse, step } = this.state;
     if (invalidPulse) {
       switch (step) {
-        case 5:
+        case 4:
           return '/images/Layer1_ErrorScreen.png';
-        case 9:
+        case 7:
           return '/images/Layer2_ErrorScreen.png';
-        case 13:
+        case 10:
           return '/images/Layer3_ErrorScreen.png';
         default:
           return '';
@@ -138,28 +138,22 @@ class App extends Component {
       case 2:
         return '/images/Screen_2_2019.png';
       case 3:
-        return '/images/Screen_3_2019.png';
-      case 4:
         return '/images/First_Layer.png';
-      case 5:
+      case 4:
         return '/images/First_Layer-1.png';
-      case 6:
+      case 5:
         return '/images/Second_Layer.png';
-      case 7:
-        return '/images/Second_Layer-1.png';
-      case 8:
+      case 6:
         return '/images/Second_Layer-2.png';
-      case 9:
+      case 7:
         return '/images/Second_Layer-3.png';
-      case 10:
+      case 8:
         return '/images/Third_Layer-3.png';
-      case 11:
-        return '/images/Third_Layer.png';
-      case 12:
+      case 9:
         return '/images/Third_Layer-1.png';
-      case 13:
+      case 10:
         return '/images/Third_Layer-2.png';
-      case 14:
+      case 11:
         return '/images/Oil_Layer.png';
       default:
         return '';
@@ -167,18 +161,15 @@ class App extends Component {
   }
 
   getSpinnerMessage() {
-    const { step } = this.state;
+    const { invalidPulse, step } = this.state;
+
+    if (invalidPulse) return '';
 
     switch (step) {
-      case 3:
-        return 'Drilling has started...';
-      case 5:
-      case 9:
-      case 13:
-        return 'Receiving data...';
+      case 4:
       case 7:
-      case 11:
-        return 'Resume Drilling...';
+      case 10:
+        return 'Receiving data...';
       case 0:
       default:
         return '';
@@ -215,7 +206,7 @@ class App extends Component {
   }
 
   render() {
-    const { resetMessage, step } = this.state;
+    const { invalidPulse, resetMessage, step } = this.state;
 
     if (resetMessage) {
       setTimeout(() => {
@@ -225,8 +216,7 @@ class App extends Component {
     }
 
     const spinnerVisibilityClass = (
-      step === 0 || step === 3 || step === 5 || step === 7
-      || step === 9 || step === 11 || step === 13
+      (step === 0 || step === 4 || step === 7 || step === 10) && !invalidPulse
     ) ? 'spinner-container' : 'd-none spinner-container';
 
     return (
