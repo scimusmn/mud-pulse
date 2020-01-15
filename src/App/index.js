@@ -166,11 +166,12 @@ class App extends Component {
     if (invalidPulse) return '';
 
     switch (step) {
+      case 0:
+        return 'Loading...';
       case 4:
       case 7:
       case 10:
         return 'Receiving data...';
-      case 0:
       default:
         return '';
     }
