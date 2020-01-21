@@ -82,8 +82,7 @@ void loop() {
 
   // take a sample every 'millisBetweenSample'
   if (currentMillis - lastSampleMillis > millisBetweenSample) {
-    averager.insertNewSample(analogRead(analogInput1Pin));
-    averagePressure = averager.calculateAverage();
+    averagePressure = analogRead(analogInput1Pin);
 
     //scale pressure data for 4d display
     traceValue = map(averagePressure, 0, 1023, 0, 100);
