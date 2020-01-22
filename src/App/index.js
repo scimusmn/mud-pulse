@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { Container, Spinner } from 'reactstrap';
 import propTypes from 'prop-types';
 
-import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
+import { WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
@@ -44,7 +44,7 @@ class App extends Component {
       anticipatedStrata, graphing, handshake, invalidPulse, resetMessage, round, step,
     } = this.state;
 
-    if (data.message === ARDUINO_READY.message) {
+    if (data.message === 'arduino-ready') {
       if (!handshake) this.setState({ handshake: true, step: 1 });
 
       this.setState({
@@ -56,7 +56,7 @@ class App extends Component {
     if (handshake) {
       if (!resetMessage) {
         if (data.message === 'material') {
-          if (data.value === anticipatedStrata[round]) {
+          if (Number(data.value) === Number(anticipatedStrata[round])) {
             this.setState(prevState => ({ step: prevState.step + 1 }));
 
             if (round === 2) {
@@ -94,13 +94,13 @@ class App extends Component {
                 break;
             }
 
-            sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+            sendData('{allow-graphing:1}');
             this.setState({ invalidPulse: false, step: prevStep });
           } else if (!graphing && (step === 3 || step === 6 || step === 9)) {
             this.setState(prevState => ({ graphing: true, step: prevState.step + 1 }));
           } else {
             if (step === 2 || step === 5 || step === 8) {
-              sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
+              sendData('{allow-graphing:1}');
             }
             this.setState(prevState => ({ step: prevState.step + 1 }));
           }
@@ -108,7 +108,7 @@ class App extends Component {
 
         // Ending sampling
         if (data.message === 'time-up') {
-          sendData(JSON.stringify({ message: 'allow-graphing', value: 0 }));
+          sendData('{allow-graphing:0}');
           this.setState({ graphing: false });
         }
       }
@@ -183,7 +183,7 @@ class App extends Component {
 
     if (pingArduinoStatus) this.refreshPorts();
     this.setState({ pingArduinoStatus: true });
-    sendData(JSON.stringify(WAKE_ARDUINO));
+    sendData(WAKE_ARDUINO);
 
     setTimeout(() => { this.pingArduino(); }, 5000);
   }
