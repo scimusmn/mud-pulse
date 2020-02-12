@@ -133,14 +133,15 @@ void setup() {
 }
 
 void loop() {
-  analogInput1.idle();
+  serialController.update();
+
+  analogInput1.update();
 
   // Write the mapped values
 // GENIE genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
-  button1.idle();
-  serialController.idle();
-  timer1.idle();
+  button1.update();
+  timer1.update();
 }
 
 
