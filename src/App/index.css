@@ -18,6 +18,17 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
 }
 
+#layerInfo {
+  position: absolute;
+  z-index: 1000;
+}
+
+#stepInfo {
+  margin-top: 25px;
+  position: absolute;
+  z-index: 1000;
+}
+
 .artboard {
   left: 0;
   position: absolute;
@@ -26,10 +37,28 @@ code {
   width: 100%;
 }
 
-.next-btn {
+.next-btn,
+.next-btn:active,
+.next-btn:focus {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: 0;
+  bottom: 75px;
+  box-shadow: none !important;
   left: 50%;
+  outline: 0;
   position: absolute;
-  top: 90%;
+  transform: translateX(-50%);
+  width: 350px;
+  z-index: 5000;
+}
+
+.next-btn:active {
+  width: 340px;
+}
+
+.next-btn img {
+  width: 100%;
 }
 
 .chart-wrapper {

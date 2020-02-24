@@ -18,7 +18,7 @@ class App extends Component {
       pingArduinoStatus: false,
       refreshPortCount: 0,
       layer: 0,
-      step: 1,
+      step: 0,
       graphing: false,
     };
 
@@ -36,9 +36,9 @@ class App extends Component {
   }
 
   onSerialData(data) {
-    const {
-      anticipatedStrata, handshake, layer,
-    } = this.state;
+    const { anticipatedStrata, handshake, layer } = this.state;
+
+    console.log(JSON.stringify(data));
 
     if (data.message === ARDUINO_READY.message) {
       if (!handshake) this.setState({ handshake: true, step: 2, layer: 0 });
@@ -65,46 +65,45 @@ class App extends Component {
     const { step, layer } = this.state;
 
     switch (true) {
+      case ((layer === 0) && (step === 0)):
+        return '/images/01_DrillBit_Intro.png';
+
       case ((layer === 0) && (step === 1)):
-        return '/images/Screen_0_2019.png';
+        return '/images/02_DrillBit_NotDrilled_Progress.png';
       case ((layer === 0) && (step === 2)):
-        return '/images/Title_Screen_2019.png';
+        return '/images/03_DrillBit_NotDrilled_Instructions.png';
       case ((layer === 0) && (step === 3)):
-        return '/images/Screen_1_2019.png';
+        return '/images/04_DrillBit_NotDrilled_Analysis.png';
       case ((layer === 0) && (step === 4)):
-        return '/images/Screen_2_2019.png';
+        return '/images/05_DrillBit_NotDrilled_DrillingSuccess.png';
+
       case ((layer === 1) && (step === 1)):
-        return '/images/First_Layer.png';
+        return '/images/07_DrillBit_Mudstone_Progress.png';
       case ((layer === 1) && (step === 2)):
-        return '/images/First_Layer_analysis.png';
+        return '/images/08_DrillBit_Mudstone_Instructions.png';
       case ((layer === 1) && (step === 3)):
-        return '/images/First_Layer_Error_Screen.png';
+        return '/images/09_DrillBit_Mudstone_Analysis.png';
       case ((layer === 1) && (step === 4)):
-        return '/images/First_Layer_identified.png';
+        return '/images/10_DrillBit_Mudstone_DrillingSuccess.png';
+
       case ((layer === 2) && (step === 1)):
-        return '/images/Second_Layer.png';
+        return '/images/12_DrillBit_Sandstone_Progress.png';
       case ((layer === 2) && (step === 2)):
-        return '/images/Second_Layer_analysis.png';
+        return '/images/13_DrillBit_Sandstone_Instructions.png';
       case ((layer === 2) && (step === 3)):
-        return '/images/Second_Layer_Error_Screen.png';
+        return '/images/14_DrillBit_Sandstone_Analysis.png';
       case ((layer === 2) && (step === 4)):
-        return '/images/Second_Layer_identified.png';
+        return '/images/15_DrillBit_Sandstone_DrillingSuccess.png';
+
       case ((layer === 3) && (step === 1)):
-        return '/images/Third_Layer.png';
+        return '/images/17_DrillBit_Dolomite_Progress.png';
       case ((layer === 3) && (step === 2)):
-        return '/images/Third_Layer_analysis.png';
+        return '/images/18_DrillBit_Dolomite_Instructions.png';
       case ((layer === 3) && (step === 3)):
-        return '/images/Third_Layer_Error_Screen.png';
+        return '/images/19_DrillBit_Dolomite_Analysis.png';
       case ((layer === 3) && (step === 4)):
-        return '/images/Third_Layer_identified.png';
-      case ((layer === 4) && (step === 1)):
-        return '/images/Fourth_Layer.png';
-      case ((layer === 4) && (step === 2)):
-        return '/images/Fourth_Layer_analysis.png';
-      case ((layer === 4) && (step === 3)):
-        return '/images/Fourth_Layer_Error_Screen.png';
-      case ((layer === 4) && (step === 4)):
-        return '/images/Fourth_Layer_identified.png';
+        return '/images/20_DrillBit_Dolomite_DrillingSuccess.png';
+
       default:
         return '';
     }
@@ -113,27 +112,32 @@ class App extends Component {
   nextClick() {
     const { step, layer } = this.state;
     const { sendData } = this.props;
-    let prevStep;
-    let prevLayer;
-    prevStep = step;
-    prevLayer = layer;
-    if (prevStep === 3 && layer !== 0) {
-      this.setState({ graphing: true });
+
+    let currentStep = step;
+    let currentLayer = layer;
+
+    console.log(currentStep);
+
+    // Allowing Graphing?
+    if (currentStep === 1) {
       sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-    } else prevStep += 1;
-    if (prevStep === 2 && layer !== 0) {
+    } else if (currentStep === 2) {
       this.setState({ graphing: true });
-      sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
     }
-    if (prevStep > 4) {
-      prevLayer += 1;
-      prevStep = 1;
+
+    currentStep += 1;
+
+    if (currentStep > 4) {
+      currentLayer += 1;
+      currentStep = 1;
     }
-    if (prevLayer > 4) {
-      prevLayer = 0;
-      prevStep = 2;
-    }
-    this.setState({ layer: prevLayer, step: prevStep });
+
+    // if (currentLayer > 4) {
+    //   currentLayer = 0;
+    //   currentStep = 2;
+    // }
+
+    this.setState({ layer: currentLayer, step: currentStep });
   }
 
   pingArduino() {
@@ -179,17 +183,18 @@ class App extends Component {
 
     const spinnerVisibilityClass = (graphing) ? 'spinner-container' : 'd-none spinner-container';
 
-    const buttonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
+    // const buttonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
+    const buttonVisibilityClass = (graphing) ? 'next-btn' : 'next-btn';
 
     return (
       <Fragment>
         <Container>
-          <p>
+          <p id="layerInfo">
             Layer:
             {' '}
             {layer}
           </p>
-          <p>
+          <p id="stepInfo">
             Step:
             {' '}
             {step}
@@ -200,7 +205,7 @@ class App extends Component {
             color="primary"
             onClick={() => this.nextClick()}
           >
-          NEXT
+            <img alt="Action Button" src="/images/1010_Button_DigitalAsset_MessagingFromTheDrillBit_GTS_2020-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
             <Spinner />
