@@ -3,7 +3,7 @@ import React, { Component, Fragment } from 'react';
 import { Container, Spinner, Button } from 'reactstrap';
 import propTypes from 'prop-types';
 
-import { ARDUINO_READY, WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
+import { WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
@@ -14,15 +14,17 @@ class App extends Component {
     super(props);
     this.state = {
       anticipatedStrata: [3, 4, 2, 5],
+      graphing: false,
       handshake: false,
+      invalidPulse: false,
       pingArduinoStatus: false,
       refreshPortCount: 0,
       layer: 0,
       step: 0,
-      graphing: false,
     };
 
     this.getArtboard = this.getArtboard.bind(this);
+    this.nextClick = this.nextClick.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
@@ -38,10 +40,10 @@ class App extends Component {
   onSerialData(data) {
     const { anticipatedStrata, handshake, layer } = this.state;
 
-    console.log(JSON.stringify(data));
+    console.log(data);
 
-    if (data.message === ARDUINO_READY.message) {
-      if (!handshake) this.setState({ handshake: true, step: 2, layer: 0 });
+    if (data.message === 'arduino-ready') {
+      if (!handshake) this.setState({ handshake: true, step: 0, layer: 0 });
 
       this.setState({
         pingArduinoStatus: false,
@@ -50,12 +52,17 @@ class App extends Component {
     }
 
     if (handshake) {
-      if (data.message === 'material' && layer > 0) {
-        if (data.value === anticipatedStrata[layer - 1]) {
-          this.setState({ step: 4 });
+      if (data.message === 'material') {
+        if (Number(data.value) === anticipatedStrata[layer]) {
+          this.setState({
+            graphing: false,
+            invalidPulse: true,
+            step: 5,
+          });
         } else {
-          this.setState({ step: 3 });
+          this.setState({ step: 4 });
         }
+
         this.setState({ graphing: false });
       }
     }
@@ -76,6 +83,8 @@ class App extends Component {
         return '/images/04_DrillBit_NotDrilled_Analysis.png';
       case ((layer === 0) && (step === 4)):
         return '/images/05_DrillBit_NotDrilled_DrillingSuccess.png';
+      case ((layer === 0) && (step === 5)):
+        return '/images/06_DrillBit_NotDrilled_DrillingFailure.png';
 
       case ((layer === 1) && (step === 1)):
         return '/images/07_DrillBit_Mudstone_Progress.png';
@@ -85,6 +94,8 @@ class App extends Component {
         return '/images/09_DrillBit_Mudstone_Analysis.png';
       case ((layer === 1) && (step === 4)):
         return '/images/10_DrillBit_Mudstone_DrillingSuccess.png';
+      case ((layer === 1) && (step === 5)):
+        return '/images/11_DrillBit_Mudstone_DrillingFailure.png';
 
       case ((layer === 2) && (step === 1)):
         return '/images/12_DrillBit_Sandstone_Progress.png';
@@ -94,6 +105,8 @@ class App extends Component {
         return '/images/14_DrillBit_Sandstone_Analysis.png';
       case ((layer === 2) && (step === 4)):
         return '/images/15_DrillBit_Sandstone_DrillingSuccess.png';
+      case ((layer === 2) && (step === 5)):
+        return '/images/16_DrillBit_Sandstone_DrillingFailure.png';
 
       case ((layer === 3) && (step === 1)):
         return '/images/17_DrillBit_Dolomite_Progress.png';
@@ -103,6 +116,8 @@ class App extends Component {
         return '/images/19_DrillBit_Dolomite_Analysis.png';
       case ((layer === 3) && (step === 4)):
         return '/images/20_DrillBit_Dolomite_DrillingSuccess.png';
+      case ((layer === 3) && (step === 5)):
+        return '/images/21_DrillBit_Dolomite_DrillingFailure.png';
 
       default:
         return '';
@@ -110,34 +125,40 @@ class App extends Component {
   }
 
   nextClick() {
-    const { step, layer } = this.state;
+    const { invalidPulse, step, layer } = this.state;
     const { sendData } = this.props;
 
     let currentStep = step;
     let currentLayer = layer;
 
-    console.log(currentStep);
+    if (invalidPulse) {
+      currentStep = 2;
+    } else {
+      if (currentStep === 2) {
+        sendData('{allow-graphing:1}');
+        this.setState({ graphing: true });
+      }
 
-    // Allowing Graphing?
-    if (currentStep === 1) {
-      sendData(JSON.stringify({ message: 'allow-graphing', value: 1 }));
-    } else if (currentStep === 2) {
-      this.setState({ graphing: true });
+      currentStep += 1;
+
+      // Handle successful end of layer
+      if (currentStep > 4) {
+        currentLayer += 1;
+        currentStep = 1;
+      }
+
+      // Handle successful end of game
+      if (currentLayer > 4) {
+        currentLayer = 0;
+        currentStep = 1;
+      }
     }
 
-    currentStep += 1;
-
-    if (currentStep > 4) {
-      currentLayer += 1;
-      currentStep = 1;
-    }
-
-    // if (currentLayer > 4) {
-    //   currentLayer = 0;
-    //   currentStep = 2;
-    // }
-
-    this.setState({ layer: currentLayer, step: currentStep });
+    this.setState({
+      invalidPulse: false,
+      layer: currentLayer,
+      step: currentStep,
+    });
   }
 
   pingArduino() {
@@ -171,7 +192,7 @@ class App extends Component {
 
   render() {
     const {
-      step, layer, graphing,
+      graphing, invalidPulse, layer, step,
     } = this.state;
 
     // if (resetMessage) {
@@ -182,9 +203,8 @@ class App extends Component {
     // }
 
     const spinnerVisibilityClass = (graphing) ? 'spinner-container' : 'd-none spinner-container';
-
-    // const buttonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
-    const buttonVisibilityClass = (graphing) ? 'next-btn' : 'next-btn';
+    const actionButtonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
+    const errorButtonVisibilityClass = (!invalidPulse) ? 'd-none next-btn' : 'next-btn';
 
     return (
       <Fragment>
@@ -201,11 +221,18 @@ class App extends Component {
           </p>
           <img alt="Artboard" className="artboard" src={this.getArtboard()} />
           <Button
-            className={buttonVisibilityClass}
+            className={actionButtonVisibilityClass}
             color="primary"
             onClick={() => this.nextClick()}
           >
             <img alt="Action Button" src="/images/1010_Button_DigitalAsset_MessagingFromTheDrillBit_GTS_2020-01.png" />
+          </Button>
+          <Button
+            className={errorButtonVisibilityClass}
+            color="primary"
+            onClick={() => this.nextClick()}
+          >
+            <img alt="Error Button" src="/images/1010_RedButton_DigitalAsset_MessagingFromTheDrillBit_GTS_2020-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
             <Spinner />
