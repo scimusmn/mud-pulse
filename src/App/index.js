@@ -1,6 +1,7 @@
 /* eslint no-console: 0 */
 import React, { Component, Fragment } from 'react';
-import { Container, Spinner, Button } from 'reactstrap';
+import { Wave } from 'react-animated-text';
+import { Button, Container } from 'reactstrap';
 import propTypes from 'prop-types';
 
 import { WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
@@ -9,25 +10,29 @@ import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialH
 import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
 import './index.css';
 
+const initialState = {
+  anticipatedStrata: [2, 3, 4, 5],
+  graphing: false,
+  handshake: false,
+  invalidPulse: false,
+  pingArduinoStatus: false,
+  refreshPortCount: 0,
+  layer: 0,
+  step: -1,
+  timeout: null,
+};
+
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      anticipatedStrata: [3, 4, 2, 5],
-      graphing: false,
-      handshake: false,
-      invalidPulse: false,
-      pingArduinoStatus: false,
-      refreshPortCount: 0,
-      layer: 0,
-      step: 0,
-    };
+    this.state = initialState;
 
     this.getArtboard = this.getArtboard.bind(this);
     this.nextClick = this.nextClick.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
+    this.reset = this.reset.bind(this);
   }
 
   componentDidMount() {
@@ -43,7 +48,7 @@ class App extends Component {
     console.log(data);
 
     if (data.message === 'arduino-ready') {
-      if (!handshake) this.setState({ handshake: true, step: 0, layer: 0 });
+      if (!handshake) this.setState({ handshake: true });
 
       this.setState({
         pingArduinoStatus: false,
@@ -56,14 +61,16 @@ class App extends Component {
         if (Number(data.value) === anticipatedStrata[layer]) {
           this.setState({
             graphing: false,
+            invalidPulse: false,
+            step: 4,
+          });
+        } else {
+          this.setState({
+            graphing: false,
             invalidPulse: true,
             step: 5,
           });
-        } else {
-          this.setState({ step: 4 });
         }
-
-        this.setState({ graphing: false });
       }
     }
   }
@@ -125,8 +132,12 @@ class App extends Component {
   }
 
   nextClick() {
-    const { invalidPulse, step, layer } = this.state;
+    const {
+      invalidPulse, layer, step, timeout,
+    } = this.state;
     const { sendData } = this.props;
+
+    clearTimeout(timeout);
 
     let currentStep = step;
     let currentLayer = layer;
@@ -148,7 +159,7 @@ class App extends Component {
       }
 
       // Handle successful end of game
-      if (currentLayer > 4) {
+      if (currentLayer === 3) {
         currentLayer = 0;
         currentStep = 1;
       }
@@ -158,6 +169,7 @@ class App extends Component {
       invalidPulse: false,
       layer: currentLayer,
       step: currentStep,
+      timeout: setTimeout(() => this.reset(), 90000),
     });
   }
 
@@ -190,9 +202,13 @@ class App extends Component {
     this.setState(prevState => ({ refreshPortCount: prevState.refreshPortCount + 1 }));
   }
 
+  reset() {
+    this.setState(initialState);
+  }
+
   render() {
     const {
-      graphing, invalidPulse, layer, step,
+      graphing, handshake, invalidPulse, layer, step,
     } = this.state;
 
     // if (resetMessage) {
@@ -202,9 +218,35 @@ class App extends Component {
     //   }, 10000);
     // }
 
+    if (!handshake) {
+      return (
+        <Fragment>
+          <Container>
+            <div id="loading">
+              <Wave effect="fadeOut" text="Loading..." />
+            </div>
+          </Container>
+        </Fragment>
+      );
+    }
+
     const spinnerVisibilityClass = (graphing) ? 'spinner-container' : 'd-none spinner-container';
-    const actionButtonVisibilityClass = (graphing) ? 'd-none next-btn' : 'next-btn';
+    const actionButtonVisibilityClass = (graphing || invalidPulse || step === -1) ? 'd-none next-btn' : 'next-btn';
     const errorButtonVisibilityClass = (!invalidPulse) ? 'd-none next-btn' : 'next-btn';
+
+    const artboard = () => {
+      if (layer === 0 && step === -1) {
+        return (
+          <Button className="attract-btn" onClick={() => this.nextClick()}>
+            <img alt="Start Button" src="/images/1010_AttractScreenTitle_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png" />
+          </Button>
+        );
+      }
+
+      return (
+        <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+      );
+    };
 
     return (
       <Fragment>
@@ -219,7 +261,7 @@ class App extends Component {
             {' '}
             {step}
           </p>
-          <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+          {artboard()}
           <Button
             className={actionButtonVisibilityClass}
             color="primary"
@@ -232,17 +274,16 @@ class App extends Component {
             color="primary"
             onClick={() => this.nextClick()}
           >
-            <img alt="Error Button" src="/images/1010_RedButton_DigitalAsset_MessagingFromTheDrillBit_GTS_2020-01.png" />
+            <img alt="Error Button" src="/images/1010_RedButton_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
-            <Spinner />
-            <span className="text-light">Receiving data...</span>
+            <img alt="Drill Animation" id="drillAnimation" src="/images/DrillBit_Animation_GTS_2020_RG.gif" />
           </div>
           <PeriodicGraphWithSerialCommunication
+            graphing={graphing}
             gridColor="rgb(255, 255, 255)"
             label="Sampled Pulses"
             message="pressure-reading"
-            graphing={graphing}
             type="line"
             yMax={1023}
           />
