@@ -17,6 +17,7 @@ class PeriodicGraph extends Component {
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
+      graphing: props.graphing,
     };
 
     this.chartReference = {};
@@ -40,30 +41,31 @@ class PeriodicGraph extends Component {
   }
 
   onSerialData(data) {
-    const { resetMessage, step } = this.props;
-    const { message } = this.state;
+    const { message, graphing } = this.state;
 
-    if (!resetMessage) {
-      if (data.message === 'button-press' && (step === 3 || step === 6 || step === 9)) {
+    if (graphing) {
+      if (this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
         this.resetGraph();
-        this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
       }
 
-      if (data.message === 'time-up') {
-        this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
-      }
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
+    }
 
-      if (data.message === message
-        && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
-        this.chartReference.chartInstance.config.data.datasets[0].data.push({
-          x: Date.now(),
-          y: data.value,
-        });
+    if (data.message === 'time-up') {
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
+      // this.setState({ graphing: false });
+    }
 
-        this.chartReference.chartInstance.update({
-          preservation: true,
-        });
-      }
+    if (data.message === message
+      && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
+      this.chartReference.chartInstance.config.data.datasets[0].data.push({
+        x: Date.now(),
+        y: data.value,
+      });
+
+      this.chartReference.chartInstance.update({
+        preservation: true,
+      });
     }
   }
 
@@ -129,10 +131,11 @@ class PeriodicGraph extends Component {
   }
 
   render() {
-    const { step } = this.props;
-    const { backgroundColor, borderColor, type } = this.state;
-    const graphClass = (step === 4 || step === 7 || step === 10) ? 'chart-wrapper' : 'chart-wrapper d-none';
+    const {
+      backgroundColor, borderColor, type, graphing,
+    } = this.state;
 
+    const graphClass = (graphing) ? 'chart-wrapper' : 'chart-wrapper d-none';
     const graphData = {
       datasets: [{
         backgroundColor,
@@ -164,9 +167,8 @@ PeriodicGraph.propTypes = {
   borderColor: propTypes.string,
   gridColor: propTypes.string,
   message: propTypes.string.isRequired,
-  resetMessage: propTypes.bool.isRequired,
   setOnDataCallback: propTypes.func.isRequired,
-  step: propTypes.number.isRequired,
+  graphing: propTypes.bool.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,
   yMin: propTypes.number,

@@ -7,9 +7,7 @@
 // DO NOT power display using built-in 5V regulator on Arduino
 // Refer to Visi-Genie Gauge documentation for object names
 
-#include "arduino-base/Libraries/AnalogInput.h"
-#include "arduino-base/Libraries/Button.h"
-#include "arduino-base/Libraries/Timer.h"
+#include "arduino-base/Libraries/Averager.h"
 #include "arduino-base/Libraries/SerialController.hpp"
 
 // Use library manager in the Arduino IDE to add this library
@@ -17,10 +15,6 @@
 
 #define analogInput1Pin A0
 #define resetLine 4
-#define button1Pin 2
-
-// Mud Pulse state management since we're using the button to do multiple things
-int allowGraphing = 0;
 
 // Stele communication
 SerialController serialController;
@@ -29,35 +23,37 @@ long steleBaudRate = 115200;
 // Genie communication
 long genieBaudRate = 9600;
 
-AnalogInput analogInput1;
-int traceValue;
-Button button1;
-// GENIE Genie genie;
-Timer timer1;
+Genie genie;
+Averager averager;
 
-int currentAnalogInput1Value = 0;
+int allowGraphing = 0;  // flag that sends pres data to stele
+int averagePressure = 0; // stores the running average pres
+int traceValue;  // 0-100 sent to 4D display
+int lastAvgPres = 0;
 int pulseCount = 0;
-bool newread = true;
-int val1;
-int val2;
-int timerDuration = 5000;
-bool rising = false;
-bool triggered = false;
+int millisBetweenSample = 5; //millis between taking analog read
+int timerDuration = 5000;  // time in millis to send pressure data
+bool rising = false; // used for pulse detection
+
 // Set threshold band
 int hysteresis = 20;
-long timeNow;
-// int peakValue = 0;
-// int threshold = 50;
+unsigned long graphStartMillis;
+unsigned long currentMillis;
+unsigned long lastSampleMillis;
 
 void setup() {
+  averager.setup(10, false);
+
   // Ensure Serial Port is open and ready to communicate
   serialController.setup(steleBaudRate, [](char* message, char* value) {
     onParse(message, value);
   });
 
   // LCD display is on hardware Serial1
-// GENIE   Serial1.begin(genieBaudRate);
-// GENIE   genie.Begin(Serial1);
+  Serial1.begin(genieBaudRate);
+  genie.Begin(Serial1);
+
+  pinMode(analogInput1Pin, INPUT);
 
   // Set D4 on Arduino to Output
   pinMode(resetLine, OUTPUT);
@@ -69,89 +65,60 @@ void setup() {
   // unReset the Display via D4
   digitalWrite(resetLine, 1);
   delay(4000);
-
-  // ANALOG INPUTS
-  // We need to do averaging or we'll crash the app
-  boolean enableAverager = true;
-  // Sampling Rate shoud be high to throw out unecessary data, but low enough to not impact performance
-  int samplingRate = 5;
-  // We don't want use LowPass because that will make the graph not as responsive
-  boolean enableLowPass = false;
-
-  analogInput1.setup(analogInput1Pin, enableAverager, samplingRate, enableLowPass, [](int analogInputValue) {
-    currentAnalogInput1Value = analogInputValue;
-
-    if (allowGraphing == 1 && timer1.isRunning() == true) {
-      serialController.sendMessage("pressure-reading", currentAnalogInput1Value);
-    }
-
-    // Map values for scope plot
-    traceValue = map(currentAnalogInput1Value, 0, 1023, 0, 100);
-  });
-
-  // DIGITAL INPUTS
-  button1.setup(button1Pin, [](int state) {
-    if (!state) {
-      if (timer1.isRunning() == false) {
-        serialController.sendMessage("button-press", 1);
-        if (allowGraphing == 1) {
-          // Tell application to start listening to data
-          pulseCount = 0;
-          timer1.start();
-          timeNow = millis();
-        }
-      }
-    }
-  });
-
-  // TIMER
-  timer1.setup([](boolean running, boolean ended, unsigned long timeElapsed) {
-    if (running == true) {
-      val1 = currentAnalogInput1Value;
-      if (millis() > timeNow + 100) {
-        val2 = currentAnalogInput1Value;
-        timeNow = millis();
-      }
-
-      if (val1 >= val2 + hysteresis) {
-        rising = true;
-      } else if ((rising) && (val1 <= val2 - hysteresis)) {
-        rising = false;
-        triggered = true;
-      }
-
-      if (triggered) {
-        pulseCount++;
-        triggered = false;
-      }
-    }
-    else if (ended == true) {
-      serialController.sendMessage("time-up", 1);
-      serialController.sendMessage("material", pulseCount);
-    }
-  }, timerDuration);
 }
 
 void loop() {
+  currentMillis = millis();
+
+  // end graphing after timerDuration
+  if ((currentMillis - graphStartMillis > timerDuration) && allowGraphing) {
+    allowGraphing = 0;
+    serialController.sendMessage("time-up", 1);
+    serialController.sendMessage("material", pulseCount);
+  }
+
+  // take a sample every 'millisBetweenSample'
+  if (currentMillis - lastSampleMillis > millisBetweenSample) {
+    averagePressure = analogRead(analogInput1Pin);
+
+    // scale pressure data for 4d display
+    traceValue = map(averagePressure, 0, 1023, 0, 100);
+
+    // if graphing, monitor for pulses and send pressure data to Stele
+    if (allowGraphing) {
+      if (averagePressure >= lastAvgPres + hysteresis) {
+        rising = true;
+      } else if ((rising) && (averagePressure <= lastAvgPres - hysteresis)) {
+        // if it was rising but is now falling, count a pulse.
+        rising = false;
+        pulseCount++;
+      }
+
+      // send a pressure reading to stele
+      serialController.sendMessage("pressure-reading", averagePressure);
+    }
+
+    // Write the mapped values to small screen
+    genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
+
+    // store info for last reading
+    lastAvgPres = averagePressure;
+    lastSampleMillis = currentMillis;
+  }
+
   serialController.update();
-
-  analogInput1.update();
-
-  // Write the mapped values
-// GENIE genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
-
-  button1.update();
-  timer1.update();
 }
 
-
 void onParse(char* message, char* value) {
-  if (strcmp(message, "allow-graphing") == 0) {
-    allowGraphing = atoi(value);
-    serialController.sendMessage("graphing", allowGraphing);
-  }
-  else if (strcmp(message, "pressure-reading") == 0 && atoi(value) == 1) {
-    serialController.sendMessage(message, analogInput1.readValue());
+  // listen for request of 5 sec of pressure data
+  if (strcmp(message, "allow-graphing") == 0 && atoi(value) == 1) {
+    // Tell arduino to send 5 sec of pres data
+    allowGraphing = value;
+
+    if (allowGraphing) {
+      pulseCount = 0;
+      graphStartMillis = millis();
+    }
   }
   else if (strcmp(message, "wake-arduino") == 0 && atoi(value) == 1) {
     serialController.sendMessage("arduino-ready", 1);
