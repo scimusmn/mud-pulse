@@ -51,6 +51,7 @@
     "prop-types": "^15.7.2",
     "query-string": "^6.8.2",
     "react": "^16.8.6",
+    "react-animated-text": "^0.1.4",
     "react-app-polyfill": "^1.0.1",
     "react-chartjs-2": "^2.7.6",
     "react-delay": "^0.1.0",
