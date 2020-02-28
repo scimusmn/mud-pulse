@@ -45,7 +45,7 @@ class App extends Component {
   onSerialData(data) {
     const { anticipatedStrata, handshake, layer } = this.state;
 
-    console.log(data);
+    // console.log(data);
 
     if (data.message === 'arduino-ready') {
       if (!handshake) this.setState({ handshake: true });
@@ -159,9 +159,9 @@ class App extends Component {
       }
 
       // Handle successful end of game
-      if (currentLayer === 3) {
+      if (currentLayer === 4) {
         currentLayer = 0;
-        currentStep = 1;
+        currentStep = 0;
       }
     }
 
@@ -203,20 +203,18 @@ class App extends Component {
   }
 
   reset() {
-    this.setState(initialState);
+    this.setState({
+      invalidPulse: false,
+      layer: 0,
+      step: -1,
+      timeout: null,
+    });
   }
 
   render() {
     const {
       graphing, handshake, invalidPulse, layer, step,
     } = this.state;
-
-    // if (resetMessage) {
-    //   setTimeout(() => {
-    //     this.setState({ resetMessage: false });
-    //     window.location.reload();
-    //   }, 10000);
-    // }
 
     if (!handshake) {
       return (
@@ -277,7 +275,11 @@ class App extends Component {
             <img alt="Error Button" src="/images/1010_RedButton_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
-            <img alt="Drill Animation" id="drillAnimation" src="/images/DrillBit_Animation_GTS_2020_RG.gif" />
+            <img
+              alt="Drill Animation"
+              id="drillAnimation"
+              src="/images/DrillBit_Animation_GTS_2020_RG.gif"
+            />
           </div>
           <PeriodicGraphWithSerialCommunication
             graphing={graphing}

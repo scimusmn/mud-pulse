@@ -11,6 +11,7 @@
 html,
 body {
   height: 100%;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -28,10 +29,6 @@ body {
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
-}
-
-.container {
-  height: 100vh;
 }
 
 #loading {

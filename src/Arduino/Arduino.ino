@@ -11,7 +11,7 @@
 #include "arduino-base/Libraries/SerialController.hpp"
 
 // Use library manager in the Arduino IDE to add this library
-// #include <genieArduino.h>
+#include <genieArduino.h>
 
 #define analogInput1Pin A0
 #define resetLine 4
@@ -23,7 +23,7 @@ long steleBaudRate = 115200;
 // Genie communication
 long genieBaudRate = 9600;
 
-// Genie genie;
+Genie genie;
 Averager averager;
 
 int allowGraphing = 0;  // flag that sends pres data to stele
@@ -50,8 +50,8 @@ void setup() {
   });
 
   // LCD display is on hardware Serial1
-  //Serial1.begin(genieBaudRate);
-  //genie.Begin(Serial1);
+  Serial1.begin(genieBaudRate);
+  genie.Begin(Serial1);
 
   pinMode(analogInput1Pin, INPUT);
 
@@ -99,7 +99,7 @@ void loop() {
     }
 
     // Write the mapped values to small screen
-    // genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
+    genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
     // store info for last reading
     lastAvgPres = averagePressure;
