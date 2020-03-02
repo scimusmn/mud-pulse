@@ -235,8 +235,14 @@ class App extends Component {
     const artboard = () => {
       if (layer === 0 && step === -1) {
         return (
-          <Button className="attract-btn" onClick={() => this.nextClick()}>
-            <img alt="Start Button" src="/images/1010_AttractScreenTitle_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png" />
+          <Button className="attract-btn p-0" onClick={() => this.nextClick()}>
+            <div className="x" id="attractContainer">
+              <img
+                alt="Start Button"
+                className="y"
+                src="/images/1010_AttractScreenTitle_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png"
+              />
+            </div>
           </Button>
         );
       }
@@ -249,12 +255,12 @@ class App extends Component {
     return (
       <Fragment>
         <Container>
-          <p id="layerInfo">
+          <p className="d-none" id="layerInfo">
             Layer:
             {' '}
             {layer}
           </p>
-          <p id="stepInfo">
+          <p className="d-none" id="stepInfo">
             Step:
             {' '}
             {step}

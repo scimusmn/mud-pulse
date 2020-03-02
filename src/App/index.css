@@ -74,12 +74,12 @@ code {
   background-color: transparent !important;
   border: 0;
   box-shadow: none !important;
-  height: 700px;
-  left: 50%;
+  height: 100vh;
+  left: 0;
   outline: 0;
   position: absolute;
-  transform: translate(-50%);
-  top: calc(50% - 350px);
+  top: 0;
+  width: 100%;
   z-index: 5000;
 }
 
@@ -88,7 +88,32 @@ code {
 }
 
 .attract-btn img {
-  width: 100%;
+  height: 400px;
+}
+
+#attractContainer {
+  height: 100vh;
+  width: 400px;
+}
+
+.x {
+  animation: x 5s linear infinite alternate;
+}
+
+.y {
+  animation: y 7s linear infinite alternate;
+}
+
+@keyframes x {
+  100% {
+    transform: translateX(calc(100vw - 400px));
+  }
+}
+
+@keyframes y {
+  100% {
+    transform: translateY(calc(100vh - 400px));
+  }
 }
 
 .next-btn,
