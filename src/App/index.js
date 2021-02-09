@@ -80,51 +80,51 @@ class App extends Component {
 
     switch (true) {
       case ((layer === 0) && (step === 0)):
-        return '/images/01_DrillBit_Intro.png';
+        return '/images/1_Intro.png';
 
       case ((layer === 0) && (step === 1)):
-        return '/images/02_DrillBit_NotDrilled_Progress.png';
+        return '/images/2_NotDrilled_Progress.png';
       case ((layer === 0) && (step === 2)):
-        return '/images/03_DrillBit_NotDrilled_Instructions.png';
+        return '/images/3_NotDrilled_Instructions.png';
       case ((layer === 0) && (step === 3)):
-        return '/images/04_DrillBit_NotDrilled_Analysis.png';
+        return '/images/4_NotDrilled_Analysis.png';
       case ((layer === 0) && (step === 4)):
-        return '/images/05_DrillBit_NotDrilled_DrillingSuccess.png';
+        return '/images/5_NotDrilled_DrillingSuccess.png';
       case ((layer === 0) && (step === 5)):
-        return '/images/06_DrillBit_NotDrilled_DrillingFailure.png';
+        return '/images/6_NotDrilled_DrillingFailure.png';
 
       case ((layer === 1) && (step === 1)):
-        return '/images/07_DrillBit_Mudstone_Progress.png';
+        return '/images/7_Mudstone_Progress.png';
       case ((layer === 1) && (step === 2)):
-        return '/images/08_DrillBit_Mudstone_Instructions.png';
+        return '/images/8_Mudstone_Instructions.png';
       case ((layer === 1) && (step === 3)):
-        return '/images/09_DrillBit_Mudstone_Analysis.png';
+        return '/images/9_Mudstone_Analysis.png';
       case ((layer === 1) && (step === 4)):
-        return '/images/10_DrillBit_Mudstone_DrillingSuccess.png';
+        return '/images/10_Mudstone_DrillingSuccess.png';
       case ((layer === 1) && (step === 5)):
-        return '/images/11_DrillBit_Mudstone_DrillingFailure.png';
+        return '/images/11_Mudstone_DrillingFailure.png';
 
       case ((layer === 2) && (step === 1)):
-        return '/images/12_DrillBit_Sandstone_Progress.png';
+        return '/images/12_Sandstone_Progress.png';
       case ((layer === 2) && (step === 2)):
-        return '/images/13_DrillBit_Sandstone_Instructions.png';
+        return '/images/13_Sandstone_Instructions.png';
       case ((layer === 2) && (step === 3)):
-        return '/images/14_DrillBit_Sandstone_Analysis.png';
+        return '/images/14_Sandstone_Analysis.png';
       case ((layer === 2) && (step === 4)):
-        return '/images/15_DrillBit_Sandstone_DrillingSuccess.png';
+        return '/images/15_Sandstone_DrillingSuccess.png';
       case ((layer === 2) && (step === 5)):
-        return '/images/16_DrillBit_Sandstone_DrillingFailure.png';
+        return '/images/16_Sandstone_DrillingFailure.png';
 
       case ((layer === 3) && (step === 1)):
-        return '/images/17_DrillBit_Dolomite_Progress.png';
+        return '/images/17_Dolomite_Progress.png';
       case ((layer === 3) && (step === 2)):
-        return '/images/18_DrillBit_Dolomite_Instructions.png';
+        return '/images/18_Dolomite_Instructions.png';
       case ((layer === 3) && (step === 3)):
-        return '/images/19_DrillBit_Dolomite_Analysis.png';
+        return '/images/19_Dolomite_Analysis.png';
       case ((layer === 3) && (step === 4)):
-        return '/images/20_DrillBit_Dolomite_DrillingSuccess.png';
+        return '/images/20_Dolomite_DrillingSuccess.png';
       case ((layer === 3) && (step === 5)):
-        return '/images/21_DrillBit_Dolomite_DrillingFailure.png';
+        return '/images/21_Dolomite_DrillingFailure.png';
 
       default:
         return '';
@@ -240,7 +240,7 @@ class App extends Component {
               <img
                 alt="Start Button"
                 className="y"
-                src="/images/1010_AttractScreenTitle_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png"
+                src="/images/AttractScreen_Illu-01.png"
               />
             </div>
           </Button>
@@ -271,20 +271,20 @@ class App extends Component {
             color="primary"
             onClick={() => this.nextClick()}
           >
-            <img alt="Action Button" src="/images/1010_Button_DigitalAsset_MessagingFromTheDrillBit_GTS_2020-01.png" />
+            <img alt="Action Button" src="/images/YellowButton-01.png" />
           </Button>
           <Button
             className={errorButtonVisibilityClass}
             color="primary"
             onClick={() => this.nextClick()}
           >
-            <img alt="Error Button" src="/images/1010_RedButton_DigitalAsset_MessagingFromTheDrillBit_GTS_2020_RG-01.png" />
+            <img alt="Error Button" src="/images/RedButton-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
             <img
               alt="Drill Animation"
               id="drillAnimation"
-              src="/images/DrillBit_Animation_GTS_2020_RG.gif"
+              src="/images/old/DrillBit_Animation_GTS_2020_RG.gif"
             />
           </div>
           <PeriodicGraphWithSerialCommunication
