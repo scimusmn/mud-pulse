@@ -284,7 +284,7 @@ class App extends Component {
             <img
               alt="Drill Animation"
               id="drillAnimation"
-              src="/images/old/DrillBit_Animation_GTS_2020_RG.gif"
+              src="/images/DrillBit.gif"
             />
           </div>
           <PeriodicGraphWithSerialCommunication
