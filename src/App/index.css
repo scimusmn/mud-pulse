@@ -67,11 +67,20 @@ code {
   width: 100%;
 }
 
+.fs-wrapper {
+  height: 100vh;
+  width: 100vw;
+  background-color: red;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
 .attract-btn,
 .attract-btn:active,
 .attract-btn:focus {
   background: transparent !important;
-  background-color: transparent !important;
+  background-color: greenyellow !important;
   border: 0;
   box-shadow: none !important;
   height: 100vh;

@@ -135,6 +135,7 @@ class App extends Component {
     const {
       invalidPulse, layer, step, timeout,
     } = this.state;
+    console.log('nextClick:', 'layer', layer, 'step', step);
     const { sendData } = this.props;
 
     clearTimeout(timeout);
@@ -142,7 +143,18 @@ class App extends Component {
     let currentStep = step;
     let currentLayer = layer;
 
+    // Temp - Uncomment for non-arduino testing
+    // Simulate successful end of layer
+    // if (currentStep === 2) {
+    //   console.log('DEV- skipping to next step');
+    //   this.setState({
+    //     step: 4,
+    //   });
+    //   return;
+    // }
+
     if (invalidPulse) {
+      console.log('invalidPulse - restarting to step 2');
       currentStep = 2;
     } else {
       if (currentStep === 2) {
@@ -180,6 +192,8 @@ class App extends Component {
     if (pingArduinoStatus) this.refreshPorts();
     this.setState({ pingArduinoStatus: true });
     sendData(WAKE_ARDUINO);
+
+    this.setState({ handshake: true }); // DEV - Uncomment this line to skip the handshake
 
     setTimeout(() => { this.pingArduino(); }, 5000);
   }
@@ -233,6 +247,11 @@ class App extends Component {
     const errorButtonVisibilityClass = (!invalidPulse) ? 'd-none next-btn' : 'next-btn';
 
     const artboard = () => {
+      // TODO - Need to determine appropriate steps to include in "fullscreen button" conditional
+      // Might only be doable while testing with real Arduino
+      const useFsClickCallback = (step < 3 || step > 3);
+      const fsClickCallback = useFsClickCallback ? () => this.nextClick() : null;
+
       if (layer === 0 && step === -1) {
         return (
           <Button className="attract-btn p-0" onClick={() => this.nextClick()}>
@@ -248,7 +267,11 @@ class App extends Component {
       }
 
       return (
-        <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+        // eslint-disable-next-line max-len
+        // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
+        <div className="fs-wrapper" onClick={fsClickCallback}>
+          <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+        </div>
       );
     };
 
