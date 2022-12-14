@@ -70,7 +70,7 @@ code {
 .fs-wrapper {
   height: 100vh;
   width: 100vw;
-  background-color: red;
+  background-color: transparent;
   position: absolute;
   top: 0;
   left: 0;
@@ -80,7 +80,7 @@ code {
 .attract-btn:active,
 .attract-btn:focus {
   background: transparent !important;
-  background-color: greenyellow !important;
+  background-color: transparent !important;
   border: 0;
   box-shadow: none !important;
   height: 100vh;
@@ -92,9 +92,11 @@ code {
   z-index: 5000;
 }
 
-.attract-btn:active {
+/* tnordberg commented this out on 12/13/2022 because this
+ was causing the button to not work consistently on touchscreens */
+/* .attract-btn:active {
   width: 290px;
-}
+} */
 
 .attract-btn img {
   height: 400px;
