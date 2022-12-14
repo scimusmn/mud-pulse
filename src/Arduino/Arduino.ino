@@ -7,11 +7,12 @@
 // DO NOT power display using built-in 5V regulator on Arduino
 // Refer to Visi-Genie Gauge documentation for object names
 
-#include "arduino-base/Libraries/Averager.h"
 #include "arduino-base/Libraries/SerialController.hpp"
+#include "PeakCounter.hpp"
 
 // Use library manager in the Arduino IDE to add this library
 // GENIE #include <genieArduino.h>
+#include <genieArduino.h>
 
 #define analogInput1Pin A0
 #define resetLine 4
@@ -24,16 +25,15 @@ long steleBaudRate = 115200;
 long genieBaudRate = 9600;
 
 Genie genie;
-Averager averager;
 
 int allowGraphing = 0;  // flag that sends pres data to stele
-int averagePressure = 0; // stores the running average pres
+int pressure = 0; // stores the pressure
 int traceValue;  // 0-100 sent to 4D display
-int lastAvgPres = 0;
-int pulseCount = 0;
 int millisBetweenSample = 5; //millis between taking analog read
 int timerDuration = 5000;  // time in millis to send pressure data
-bool rising = false; // used for pulse detection
+
+PeakCounter<5> peaks(300, 1023, float(millisBetweenSample)/1000);
+
 
 // Set threshold band
 int hysteresis = 20;
@@ -42,8 +42,6 @@ unsigned long currentMillis;
 unsigned long lastSampleMillis;
 
 void setup() {
-  averager.setup(10, false);
-
   // Ensure Serial Port is open and ready to communicate
   serialController.setup(steleBaudRate, [](char* message, char* value) {
     onParse(message, value);
@@ -74,35 +72,29 @@ void loop() {
   if ((currentMillis - graphStartMillis > timerDuration) && allowGraphing) {
     allowGraphing = 0;
     serialController.sendMessage("time-up", 1);
-    serialController.sendMessage("material", pulseCount);
+    serialController.sendMessage("material", peaks.count());
   }
 
   // take a sample every 'millisBetweenSample'
   if (currentMillis - lastSampleMillis > millisBetweenSample) {
-    averagePressure = analogRead(analogInput1Pin);
+    pressure = analogRead(analogInput1Pin);
 
     // scale pressure data for 4d display
-    traceValue = map(averagePressure, 0, 1023, 0, 100);
+    traceValue = map(pressure, 0, 1023, 0, 100);
+    //traceValue = map(peaks.avg.value(), 0, 1023, 0, 100);
 
     // if graphing, monitor for pulses and send pressure data to Stele
     if (allowGraphing) {
-      if (averagePressure >= lastAvgPres + hysteresis) {
-        rising = true;
-      } else if ((rising) && (averagePressure <= lastAvgPres - hysteresis)) {
-        // if it was rising but is now falling, count a pulse.
-        rising = false;
-        pulseCount++;
-      }
+      peaks.push(pressure);
 
       // send a pressure reading to stele
-      serialController.sendMessage("pressure-reading", averagePressure);
+      serialController.sendMessage("pressure-reading", pressure);
     }
 
     // Write the mapped values to small screen
     genie.WriteObject(GENIE_OBJ_SCOPE, 0x00, traceValue);
 
     // store info for last reading
-    lastAvgPres = averagePressure;
     lastSampleMillis = currentMillis;
   }
 
@@ -116,7 +108,7 @@ void onParse(char* message, char* value) {
     allowGraphing = value;
 
     if (allowGraphing) {
-      pulseCount = 0;
+      peaks.reset();
       graphStartMillis = millis();
     }
   }
