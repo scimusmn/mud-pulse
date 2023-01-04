@@ -135,7 +135,7 @@ class App extends Component {
     const {
       invalidPulse, layer, step, timeout,
     } = this.state;
-    console.log('nextClick:', 'layer', layer, 'step', step);
+    // console.log('nextClick:', 'layer', layer, 'step', step);
     const { sendData } = this.props;
 
     clearTimeout(timeout);
