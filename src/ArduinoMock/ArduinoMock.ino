@@ -18,11 +18,16 @@ int traceValue;  // 0-100 sent to 4D display
 int millisBetweenSample = 5; //millis between taking analog read
 int timerDuration = 5000;  // time in millis to send pressure data
 
+float randf() {
+  return ((float)rand()) / RAND_MAX;
+}
+
 float time = 0;
 float F = 0.2;
 int fakePressureReading() {
-	float value = sin(F * 3.141592 * time);
+	float value = sin(F * time);
 	value = pow(value, 10/F);
+  value = value + (0.001 * randf());
 	time = time + 0.05;
 	return 1024 * value;
 }
