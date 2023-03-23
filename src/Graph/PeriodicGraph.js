@@ -24,12 +24,18 @@ class PeriodicGraph extends Component {
 
     this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
+    this.latestPressureReading = 0;
+    this.chartUpdateInterval = 50;
+    this.chartUpdateTimer = {};
   }
 
   componentDidMount() {
     const { setOnDataCallback } = this.props;
     setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
+    this.chartUpdateTimer = setInterval(() => {
+      this.updateGraphData(this.latestPressureReading);
+    }, this.chartUpdateInterval);
   }
 
   static getDerivedStateFromProps(props) {
@@ -38,6 +44,11 @@ class PeriodicGraph extends Component {
 
   shouldComponentUpdate() {
     return true;
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.chartUpdateTimer);
+    this.chartUpdateTimer = null;
   }
 
   onSerialData(data) {
@@ -58,14 +69,16 @@ class PeriodicGraph extends Component {
 
     if (data.message === message
       && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
-      this.chartReference.chartInstance.config.data.datasets[0].data.push({
-        x: Date.now(),
-        y: data.value,
-      });
+      this.latestPressureReading = data.value;
+      console.log(this.latestPressureReading);
+      // this.chartReference.chartInstance.config.data.datasets[0].data.push({
+      //   x: Date.now(),
+      //   y: data.value,
+      // });
 
-      this.chartReference.chartInstance.update({
-        preservation: true,
-      });
+      // this.chartReference.chartInstance.update({
+      //   preservation: true,
+      // });
     }
   }
 
@@ -123,6 +136,17 @@ class PeriodicGraph extends Component {
     };
 
     return chartOptions;
+  }
+
+  updateGraphData(pressure) {
+    this.chartReference.chartInstance.config.data.datasets[0].data.push({
+      x: Date.now(),
+      y: pressure,
+    });
+
+    this.chartReference.chartInstance.update({
+      preservation: true,
+    });
   }
 
   resetGraph() {
