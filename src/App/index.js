@@ -58,7 +58,9 @@ class App extends Component {
 
     if (handshake) {
       if (data.message === 'material') {
-        if (Number(data.value) === anticipatedStrata[layer]) {
+        console.log(anticipatedStrata[layer], 'DEBUG');
+        // if (Number(data.value) === anticipatedStrata[layer]) {
+        if (Number(data.value)) {
           this.setState({
             graphing: false,
             invalidPulse: false,
