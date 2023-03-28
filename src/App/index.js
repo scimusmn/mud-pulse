@@ -7,7 +7,7 @@ import propTypes from 'prop-types';
 import { WAKE_ARDUINO } from '../Arduino/arduino-base/ReactSerial/arduinoConstants';
 import IPC from '../Arduino/arduino-base/ReactSerial/IPCMessages';
 import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
-import PeriodicGraphWithSerialCommunication from '../Graph/PeriodicGraph';
+import PeriodicGraph from '../Graph/PeriodicGraph';
 import './index.css';
 
 const initialState = {
@@ -20,6 +20,7 @@ const initialState = {
   layer: 0,
   step: -1,
   timeout: null,
+  pressure: 0,
 };
 
 class App extends Component {
@@ -32,7 +33,11 @@ class App extends Component {
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
     this.refreshPorts = this.refreshPorts.bind(this);
-    this.reset = this.reset.bind(this);
+
+    // for pressure reading render time
+    this.latestPressureReading = 0;
+    this.chartUpdateInterval = 50;
+    this.chartUpdateTimer = {};
   }
 
   componentDidMount() {
@@ -40,12 +45,21 @@ class App extends Component {
     setOnDataCallback(this.onSerialData);
     document.addEventListener('keydown', this.handleReset);
     this.pingArduino();
+
+    // only send pressure updates while graphing
+    this.chartUpdateTimer = setInterval(() => {
+      const { graphing } = this.state;
+      if (graphing) this.setState({ pressure: this.latestPressureReading });
+    }, this.chartUpdateInterval);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.chartUpdateTimer);
+    this.chartUpdateTimer = null;
   }
 
   onSerialData(data) {
     const { anticipatedStrata, handshake, layer } = this.state;
-
-    // console.log(data);
 
     if (data.message === 'arduino-ready') {
       if (!handshake) this.setState({ handshake: true });
@@ -65,14 +79,22 @@ class App extends Component {
             graphing: false,
             invalidPulse: false,
             step: 4,
+            pressure: 0,
           });
         } else {
           this.setState({
             graphing: false,
             invalidPulse: true,
             step: 5,
+            pressure: 0,
           });
         }
+      }
+      if (data.message === 'pressure-reading') {
+        this.latestPressureReading = data.value;
+      }
+      if (data.message === 'time-up') {
+        this.setState({ graphing: false });
       }
     }
   }
@@ -183,7 +205,7 @@ class App extends Component {
       invalidPulse: false,
       layer: currentLayer,
       step: currentStep,
-      timeout: setTimeout(() => this.reset(), 90000),
+      timeout: setTimeout(() => window.reload(false), 90000),
     });
   }
 
@@ -218,18 +240,9 @@ class App extends Component {
     this.setState(prevState => ({ refreshPortCount: prevState.refreshPortCount + 1 }));
   }
 
-  reset() {
-    this.setState({
-      invalidPulse: false,
-      layer: 0,
-      step: -1,
-      timeout: null,
-    });
-  }
-
   render() {
     const {
-      graphing, handshake, invalidPulse, layer, step,
+      graphing, handshake, invalidPulse, layer, step, pressure,
     } = this.state;
 
     if (!handshake) {
@@ -312,11 +325,11 @@ class App extends Component {
               src="/images/DrillBit.gif"
             />
           </div>
-          <PeriodicGraphWithSerialCommunication
+          <PeriodicGraph
             graphing={graphing}
             gridColor="rgb(255, 255, 255)"
             label="Sampled Pulses"
-            message="pressure-reading"
+            pressure={parseInt(pressure, 0)}
             type="line"
             yMax={1023}
           />

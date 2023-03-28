@@ -3,17 +3,15 @@ import React, { Component, Fragment } from 'react';
 import propTypes from 'prop-types';
 import ChartComponent from 'react-chartjs-2';
 import 'chartjs-plugin-streaming';
-import withSerialCommunication from '../Arduino/arduino-base/ReactSerial/SerialHOC';
 
 class PeriodicGraph extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       backgroundColor: props.backgroundColor,
       borderColor: props.borderColor,
       gridColor: props.gridColor,
-      message: props.message,
+      pressure: props.pressure,
       type: props.type,
       yMax: props.yMax,
       yMin: props.yMin,
@@ -22,64 +20,15 @@ class PeriodicGraph extends Component {
 
     this.chartReference = {};
 
-    this.onSerialData = this.onSerialData.bind(this);
     this.resetGraph = this.resetGraph.bind(this);
-    this.latestPressureReading = 0;
-    this.chartUpdateInterval = 50;
-    this.chartUpdateTimer = {};
-  }
-
-  componentDidMount() {
-    const { setOnDataCallback } = this.props;
-    setOnDataCallback(this.onSerialData);
-    document.addEventListener('keydown', this.handleReset);
-    this.chartUpdateTimer = setInterval(() => {
-      this.updateGraphData(this.latestPressureReading);
-    }, this.chartUpdateInterval);
   }
 
   static getDerivedStateFromProps(props) {
-    return { graphing: props.graphing };
+    return { graphing: props.graphing, pressure: props.pressure };
   }
 
   shouldComponentUpdate() {
     return true;
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.chartUpdateTimer);
-    this.chartUpdateTimer = null;
-  }
-
-  onSerialData(data) {
-    const { message, graphing } = this.state;
-
-    if (graphing) {
-      if (this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
-        this.resetGraph();
-      }
-
-      this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
-    }
-
-    if (data.message === 'time-up') {
-      this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
-      // this.setState({ graphing: false });
-    }
-
-    if (data.message === message
-      && !this.chartReference.chartInstance.config.options.plugins.streaming.pause) {
-      this.latestPressureReading = data.value;
-      console.log(this.latestPressureReading);
-      // this.chartReference.chartInstance.config.data.datasets[0].data.push({
-      //   x: Date.now(),
-      //   y: data.value,
-      // });
-
-      // this.chartReference.chartInstance.update({
-      //   preservation: true,
-      // });
-    }
   }
 
   getChartOptions() {
@@ -156,8 +105,17 @@ class PeriodicGraph extends Component {
 
   render() {
     const {
-      backgroundColor, borderColor, type, graphing,
+      backgroundColor, borderColor, type, graphing, pressure,
     } = this.state;
+
+    if (this.chartReference.chartInstance && graphing) {
+      this.updateGraphData(pressure);
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = false;
+    }
+    if (this.chartReference.chartInstance && !graphing) {
+      this.chartReference.chartInstance.config.options.plugins.streaming.pause = true;
+      this.resetGraph();
+    }
 
     const graphClass = (graphing) ? 'chart-wrapper' : 'chart-wrapper d-none';
     const graphData = {
@@ -190,8 +148,7 @@ PeriodicGraph.propTypes = {
   backgroundColor: propTypes.string,
   borderColor: propTypes.string,
   gridColor: propTypes.string,
-  message: propTypes.string.isRequired,
-  setOnDataCallback: propTypes.func.isRequired,
+  pressure: propTypes.number.isRequired,
   graphing: propTypes.bool.isRequired,
   type: propTypes.string,
   yMax: propTypes.number,
@@ -207,6 +164,4 @@ PeriodicGraph.defaultProps = {
   yMin: 0,
 };
 
-const PeriodicGraphWithSerialCommunication = withSerialCommunication(PeriodicGraph);
-
-export default PeriodicGraphWithSerialCommunication;
+export default PeriodicGraph;
