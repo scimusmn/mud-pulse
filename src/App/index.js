@@ -21,6 +21,7 @@ const initialState = {
   step: -1,
   timeout: null,
   pressure: 0,
+  timeoutLong: null,
 };
 
 class App extends Component {
@@ -36,7 +37,7 @@ class App extends Component {
 
     // for pressure reading render time
     this.latestPressureReading = 0;
-    this.chartUpdateInterval = 50;
+    this.chartUpdateInterval = 60;
     this.chartUpdateTimer = {};
   }
 
@@ -51,6 +52,11 @@ class App extends Component {
       const { graphing } = this.state;
       if (graphing) this.setState({ pressure: this.latestPressureReading });
     }, this.chartUpdateInterval);
+
+    // refresh periodically during inactivity
+    this.setState({
+      timeoutLong: setTimeout(() => window.location.reload(false), 60000 * 20),
+    });
   }
 
   componentWillUnmount() {
@@ -157,12 +163,13 @@ class App extends Component {
 
   nextClick() {
     const {
-      invalidPulse, layer, step, timeout,
+      invalidPulse, layer, step, timeout, timeoutLong,
     } = this.state;
     // console.log('nextClick:', 'layer', layer, 'step', step);
     const { sendData } = this.props;
 
     clearTimeout(timeout);
+    clearTimeout(timeoutLong);
 
     let currentStep = step;
     let currentLayer = layer;
@@ -205,7 +212,7 @@ class App extends Component {
       invalidPulse: false,
       layer: currentLayer,
       step: currentStep,
-      timeout: setTimeout(() => window.reload(false), 90000),
+      timeout: setTimeout(() => window.location.reload(false), 90000),
     });
   }
 
