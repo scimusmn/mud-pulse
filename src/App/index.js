@@ -29,7 +29,6 @@ class App extends Component {
     super(props);
     this.state = initialState;
 
-    this.getArtboard = this.getArtboard.bind(this);
     this.nextClick = this.nextClick.bind(this);
     this.onSerialData = this.onSerialData.bind(this);
     this.pingArduino = this.pingArduino.bind(this);
@@ -79,8 +78,8 @@ class App extends Component {
     if (handshake) {
       if (data.message === 'material') {
         console.log(anticipatedStrata[layer], 'DEBUG');
-        // if (Number(data.value) === anticipatedStrata[layer]) {
-        if (Number(data.value)) {
+        if (Number(data.value) === anticipatedStrata[layer]) {
+        // if (Number(data.value)) {
           this.setState({
             graphing: false,
             invalidPulse: false,
@@ -105,74 +104,19 @@ class App extends Component {
     }
   }
 
-  getArtboard() {
-    const { step, layer } = this.state;
-
-    switch (true) {
-      case ((layer === 0) && (step === 0)):
-        return '/images/1_Intro.png';
-
-      case ((layer === 0) && (step === 1)):
-        return '/images/2_NotDrilled_Progress.png';
-      case ((layer === 0) && (step === 2)):
-        return '/images/3_NotDrilled_Instructions.png';
-      case ((layer === 0) && (step === 3)):
-        return '/images/4_NotDrilled_Analysis.png';
-      case ((layer === 0) && (step === 4)):
-        return '/images/5_NotDrilled_DrillingSuccess.png';
-      case ((layer === 0) && (step === 5)):
-        return '/images/6_NotDrilled_DrillingFailure.png';
-
-      case ((layer === 1) && (step === 1)):
-        return '/images/7_Mudstone_Progress.png';
-      case ((layer === 1) && (step === 2)):
-        return '/images/8_Mudstone_Instructions.png';
-      case ((layer === 1) && (step === 3)):
-        return '/images/9_Mudstone_Analysis.png';
-      case ((layer === 1) && (step === 4)):
-        return '/images/10_Mudstone_DrillingSuccess.png';
-      case ((layer === 1) && (step === 5)):
-        return '/images/11_Mudstone_DrillingFailure.png';
-
-      case ((layer === 2) && (step === 1)):
-        return '/images/12_Sandstone_Progress.png';
-      case ((layer === 2) && (step === 2)):
-        return '/images/13_Sandstone_Instructions.png';
-      case ((layer === 2) && (step === 3)):
-        return '/images/14_Sandstone_Analysis.png';
-      case ((layer === 2) && (step === 4)):
-        return '/images/15_Sandstone_DrillingSuccess.png';
-      case ((layer === 2) && (step === 5)):
-        return '/images/16_Sandstone_DrillingFailure.png';
-
-      case ((layer === 3) && (step === 1)):
-        return '/images/17_Dolomite_Progress.png';
-      case ((layer === 3) && (step === 2)):
-        return '/images/18_Dolomite_Instructions.png';
-      case ((layer === 3) && (step === 3)):
-        return '/images/19_Dolomite_Analysis.png';
-      case ((layer === 3) && (step === 4)):
-        return '/images/20_Dolomite_DrillingSuccess.png';
-      case ((layer === 3) && (step === 5)):
-        return '/images/21_Dolomite_DrillingFailure.png';
-
-      default:
-        return '';
-    }
-  }
-
   nextClick() {
     const {
       invalidPulse, layer, step, timeout, timeoutLong,
     } = this.state;
-    // console.log('nextClick:', 'layer', layer, 'step', step);
+    console.log('nextClick:', 'layer', layer, 'step', step);
     const { sendData } = this.props;
-
     clearTimeout(timeout);
     clearTimeout(timeoutLong);
-
     let currentStep = step;
     let currentLayer = layer;
+
+    // REQUEST TO REMOVE STEP 1
+    if (currentStep === 1) currentStep = 2;
 
     // Temp - Uncomment for non-arduino testing
     // Simulate successful end of layer
@@ -186,7 +130,8 @@ class App extends Component {
 
     if (invalidPulse) {
       console.log('invalidPulse - restarting to step 2');
-      currentStep = 2;
+      currentStep = 1; // this was 2 - changed to skip instructions after error
+      console.log(currentStep, 'invalid pulse!');
     } else {
       if (currentStep === 2) {
         sendData('{allow-graphing:1}');
@@ -268,6 +213,11 @@ class App extends Component {
     const actionButtonVisibilityClass = (graphing || invalidPulse || step === -1) ? 'd-none next-btn' : 'next-btn';
     const errorButtonVisibilityClass = (!invalidPulse) ? 'd-none next-btn' : 'next-btn';
 
+    const shouldDisplay = (inLayer, inStep) => {
+      if (layer === inLayer && step === inStep) return 1;
+      return 0;
+    };
+
     const artboard = () => {
       // TODO - Need to determine appropriate steps to include in "fullscreen button" conditional
       // Might only be doable while testing with real Arduino
@@ -281,7 +231,7 @@ class App extends Component {
               <img
                 alt="Start Button"
                 className="y"
-                src="/images/AttractScreen_Illu-01.png"
+                src="../images/AttractScreen_Bubble.png"
               />
             </div>
           </Button>
@@ -292,7 +242,30 @@ class App extends Component {
         // eslint-disable-next-line max-len
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
         <div className="fs-wrapper" onClick={fsClickCallback}>
-          <img alt="Artboard" className="artboard" src={this.getArtboard()} />
+          <img alt="Artboard" className="artboard" src="../images/1_Intro.png" style={{ opacity: shouldDisplay(0, 0) }} />
+          <img alt="Artboard" className="artboard" src="../images/2_NotDrilled_Progress.png" style={{ opacity: shouldDisplay(0, 1) }} />
+          <img alt="Artboard" className="artboard" src="../images/3_NotDrilled_Instructions.png" style={{ opacity: shouldDisplay(0, 2) }} />
+          <img alt="Artboard" className="artboard" src="../images/4_NotDrilled_Analysis.png" style={{ opacity: shouldDisplay(0, 3) }} />
+          <img alt="Artboard" className="artboard" src="../images/5_NotDrilled_DrillingSuccess.png" style={{ opacity: shouldDisplay(0, 4) }} />
+          <img alt="Artboard" className="artboard" src="../images/6_NotDrilled_DrillingFailure.png" style={{ opacity: shouldDisplay(0, 5) }} />
+
+          <img alt="Artboard" className="artboard" src="../images/7_Mudstone_Progress.png" style={{ opacity: shouldDisplay(1, 1) }} />
+          <img alt="Artboard" className="artboard" src="../images/8_Mudstone_Instructions.png" style={{ opacity: shouldDisplay(1, 2) }} />
+          <img alt="Artboard" className="artboard" src="../images/9_Mudstone_Analysis.png" style={{ opacity: shouldDisplay(1, 3) }} />
+          <img alt="Artboard" className="artboard" src="../images/10_Mudstone_DrillingSuccess.png" style={{ opacity: shouldDisplay(1, 4) }} />
+          <img alt="Artboard" className="artboard" src="../images/11_Mudstone_DrillingFailure.png" style={{ opacity: shouldDisplay(1, 5) }} />
+
+          <img alt="Artboard" className="artboard" src="../images/12_Sandstone_Progress.png" style={{ opacity: shouldDisplay(2, 1) }} />
+          <img alt="Artboard" className="artboard" src="../images/13_Sandstone_Instructions.png" style={{ opacity: shouldDisplay(2, 2) }} />
+          <img alt="Artboard" className="artboard" src="../images/14_Sandstone_Analysis.png" style={{ opacity: shouldDisplay(2, 3) }} />
+          <img alt="Artboard" className="artboard" src="../images/15_Sandstone_DrillingSuccess.png" style={{ opacity: shouldDisplay(2, 4) }} />
+          <img alt="Artboard" className="artboard" src="../images/16_Sandstone_DrillingFailure.png" style={{ opacity: shouldDisplay(2, 5) }} />
+
+          <img alt="Artboard" className="artboard" src="../images/17_Dolomite_Progress.png" style={{ opacity: shouldDisplay(3, 1) }} />
+          <img alt="Artboard" className="artboard" src="../images/18_Dolomite_Instructions.png" style={{ opacity: shouldDisplay(3, 2) }} />
+          <img alt="Artboard" className="artboard" src="../images/19_Dolomite_Analysis.png" style={{ opacity: shouldDisplay(3, 3) }} />
+          <img alt="Artboard" className="artboard" src="../images/20_Dolomite_DrillingSuccess.png" style={{ opacity: shouldDisplay(3, 4) }} />
+          <img alt="Artboard" className="artboard" src="../images/21_Dolomite_DrillingFailure.png" style={{ opacity: shouldDisplay(3, 5) }} />
         </div>
       );
     };
@@ -316,20 +289,20 @@ class App extends Component {
             color="primary"
             onClick={() => this.nextClick()}
           >
-            <img alt="Action Button" src="/images/YellowButton-01.png" />
+            <img alt="Action Button" src="../images/YellowButton-01.png" />
           </Button>
           <Button
             className={errorButtonVisibilityClass}
             color="primary"
             onClick={() => this.nextClick()}
           >
-            <img alt="Error Button" src="/images/RedButton-01.png" />
+            <img alt="Error Button" src="../images/RedButton-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
             <img
               alt="Drill Animation"
               id="drillAnimation"
-              src="/images/DrillBit.gif"
+              src="../images/1010_Mudpulse_Animation.gif"
             />
           </div>
           <PeriodicGraph
