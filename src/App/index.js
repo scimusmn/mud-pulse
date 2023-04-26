@@ -77,8 +77,9 @@ class App extends Component {
 
     if (handshake) {
       if (data.message === 'material') {
-        console.log(anticipatedStrata[layer], 'DEBUG');
+        // console.log(anticipatedStrata[layer], 'DEBUG');
         if (Number(data.value) === anticipatedStrata[layer]) {
+        // to ignore incorrect mock data during testing 
         // if (Number(data.value)) {
           this.setState({
             graphing: false,
@@ -115,9 +116,6 @@ class App extends Component {
     let currentStep = step;
     let currentLayer = layer;
 
-    // REQUEST TO REMOVE STEP 1
-    if (currentStep === 1) currentStep = 2;
-
     // Temp - Uncomment for non-arduino testing
     // Simulate successful end of layer
     // if (currentStep === 2) {
@@ -130,8 +128,7 @@ class App extends Component {
 
     if (invalidPulse) {
       console.log('invalidPulse - restarting to step 2');
-      currentStep = 1; // this was 2 - changed to skip instructions after error
-      console.log(currentStep, 'invalid pulse!');
+      currentStep = 2;
     } else {
       if (currentStep === 2) {
         sendData('{allow-graphing:1}');
