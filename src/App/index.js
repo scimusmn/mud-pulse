@@ -22,6 +22,7 @@ const initialState = {
   timeout: null,
   pressure: 0,
   timeoutLong: null,
+  numPeaks: 0,
 };
 
 class App extends Component {
@@ -38,6 +39,7 @@ class App extends Component {
     this.latestPressureReading = 0;
     this.chartUpdateInterval = 60;
     this.chartUpdateTimer = {};
+    this.latestNumPeaks = 0;
   }
 
   componentDidMount() {
@@ -76,10 +78,11 @@ class App extends Component {
     }
 
     if (handshake) {
+      if (data.message === 'peaks') console.log(data.value);
       if (data.message === 'material') {
-        // console.log(anticipatedStrata[layer], 'DEBUG');
+        console.log(anticipatedStrata[layer], 'DEBUG');
         if (Number(data.value) === anticipatedStrata[layer]) {
-        // to ignore incorrect mock data during testing 
+        // to ignore incorrect mock data during testing
         // if (Number(data.value)) {
           this.setState({
             graphing: false,
@@ -99,6 +102,9 @@ class App extends Component {
       if (data.message === 'pressure-reading') {
         this.latestPressureReading = data.value;
       }
+      if (data.message === 'peaks') {
+        this.latestNumPeaks = data.value;
+      }
       if (data.message === 'time-up') {
         this.setState({ graphing: false });
       }
@@ -116,6 +122,10 @@ class App extends Component {
     let currentStep = step;
     let currentLayer = layer;
 
+    // REQUEST TO REMOVE STEP 1
+    if (currentStep === 1) currentStep = 2;
+
+
     // Temp - Uncomment for non-arduino testing
     // Simulate successful end of layer
     // if (currentStep === 2) {
@@ -127,8 +137,9 @@ class App extends Component {
     // }
 
     if (invalidPulse) {
-      console.log('invalidPulse - restarting to step 2');
-      currentStep = 2;
+      // console.log('invalidPulse - restarting to step 2');
+      // currentStep = 2;
+      currentStep = 1;
     } else {
       if (currentStep === 2) {
         sendData('{allow-graphing:1}');
@@ -296,11 +307,32 @@ class App extends Component {
             <img alt="Error Button" src="../images/RedButton-01.png" />
           </Button>
           <div className={spinnerVisibilityClass}>
-            <img
-              alt="Drill Animation"
-              id="drillAnimation"
-              src="../images/1010_Mudpulse_Animation.gif"
-            />
+            <div>
+              <img
+                alt="Drill Animation"
+                id="drillAnimation"
+                src="../images/1010_Mudpulse_Animation.gif"
+                height="700"
+              />
+            </div>
+            <div className="counter-text">
+              Squeeze
+              {' '}
+              {layer + 2}
+              x
+            </div>
+            <div className="counter-text">
+              {this.latestNumPeaks}
+              x Detected
+            </div>
+            <div style={{ position: 'relative', left: '120px', top: '-50px' }}>
+              <img
+                alt="tube"
+                id="tube"
+                src="../images/tube.png"
+                height="200px"
+              />
+            </div>
           </div>
           <PeriodicGraph
             graphing={graphing}

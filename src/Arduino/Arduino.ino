@@ -89,6 +89,7 @@ void loop() {
 
       // send a pressure reading to stele
       serialController.sendMessage("pressure-reading", pressure);
+      serialController.sendMessage("peaks", peaks.count());
     }
 
     // Write the mapped values to small screen
